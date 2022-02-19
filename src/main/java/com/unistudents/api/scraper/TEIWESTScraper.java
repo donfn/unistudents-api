@@ -1,7 +1,7 @@
 package com.unistudents.api.scraper;
 
 import com.unistudents.api.common.UserAgentGenerator;
-import com.unistudents.api.model.LoginForm;
+import com.unistudents.api.model.LoginRequest;
 import com.unistudents.api.model.StudentDTO;
 import org.jsoup.Connection;
 import org.jsoup.HttpStatusException;
@@ -36,13 +36,13 @@ public class TEIWESTScraper {
         this.PRE_LOG = "[" + university + ".TEIWEST]";
     }
 
-    public TEIWESTScraper(LoginForm loginForm, String university) {
+    public TEIWESTScraper(LoginRequest loginRequest, String university) {
         this.university = university;
         this.connected = true;
         captchaRequired = false;
         USER_AGENT = UserAgentGenerator.generate();
         this.PRE_LOG = "[" + university + ".TEIWEST]";
-        getDocuments(loginForm.getUsername(), loginForm.getPassword(), loginForm.getCookies());
+        getDocuments(loginRequest.getUsername(), loginRequest.getPassword(), loginRequest.getSession());
     }
 
     private void getDocuments(String username, String password, Map<String, String> cookies) {
@@ -93,7 +93,7 @@ public class TEIWESTScraper {
 
             setCookies(cookies);
             captchaRequired = true;
-            return new ResponseEntity<>(new StudentDTO("TEIWEST", cookies, null), HttpStatus.OK);
+            return new ResponseEntity<>(new StudentDTO(university, "TEIWEST", cookies, null), HttpStatus.OK);
         } catch (SocketTimeoutException | UnknownHostException | HttpStatusException | ConnectException connException) {
             connected = false;
             logger.warn(this.PRE_LOG + " Warning: {}", connException.getMessage(), connException);

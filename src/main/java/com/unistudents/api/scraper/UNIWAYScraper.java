@@ -2,7 +2,7 @@ package com.unistudents.api.scraper;
 
 import com.unistudents.api.common.Services;
 import com.unistudents.api.common.UserAgentGenerator;
-import com.unistudents.api.model.LoginForm;
+import com.unistudents.api.model.LoginRequest;
 import org.jsoup.Connection;
 import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
@@ -26,11 +26,11 @@ public class UNIWAYScraper {
     private Map<String, String> cookies;
     private final Logger logger = LoggerFactory.getLogger(UNIWAYScraper.class);
 
-    public UNIWAYScraper(LoginForm loginForm) {
+    public UNIWAYScraper(LoginRequest loginRequest) {
         this.authorized = true;
         this.connected = true;
         USER_AGENT = UserAgentGenerator.generate();
-        this.getDocuments(loginForm.getUsername(), loginForm.getPassword(), loginForm.getCookies());
+        this.getDocuments(loginRequest.getUsername(), loginRequest.getPassword(), loginRequest.getSession());
     }
 
     private void getDocuments(String username, String password, Map<String, String> cookies) {

@@ -43,8 +43,8 @@ public class UPATRASParser {
             /*
              *  Scrape semester's courses
              */
-            Grades grades = initGrades();
-            grades.setTotalEcts(ects);
+            Progress progress = initGrades();
+            progress.setDisplayEcts(ects);
 
             int totalPassedCourses = 0;
             int totalPassedCoursesWithoutGrades = 0;
@@ -60,7 +60,7 @@ public class UPATRASParser {
                 course.setId(columns.get(2).text());
                 course.setName(columns.get(3).text());
                 String grade = columns.get(4).text().replace(",", ".").replace("NS", "-");
-                course.setGrade(grade.equals("") ? "-" : grade);
+//                course.setGrade(grade.equals("") ? "-" : grade);
                 course.setType(columns.get(1).text());
 
                 String col7 = columns.get(7).text();
@@ -70,74 +70,74 @@ public class UPATRASParser {
                         : columns.get(6).text().trim().split(" ")[0];
 
                 String examPeriod = examMonth + " " + columns.get(5).text() + " | " + (gradeType.equals("") ? "-" : gradeType);
-                course.setExamPeriod(examPeriod);
+//                course.setExamPeriod(examPeriod);
 
-                if (course.getGrade().equals("P")) {
-                    course.setGrade("");
-                    course.setExamPeriod("ΑΠΑΛΛΑΓΗ");
-                }
+//                if (course.getGrade().equals("P")) {
+//                    course.setGrade("");
+//                    course.setExamPeriod("ΑΠΑΛΛΑΓΗ");
+//                }
 
                 // check for duplicates
                 int courseSemester = Integer.parseInt(columns.get(0).text()) - 1;
-                if (grades.getSemesters().get(courseSemester).getCourses().contains(course)) {
-                    for (Course semCourse: grades.getSemesters().get(courseSemester).getCourses()) {
-                        if (semCourse.getId().equals(course.getId()) && semCourse.getGrade().equals("-") && !course.getGrade().equals("-")) {
-                            semCourse.setExamPeriod(course.getExamPeriod());
-                            semCourse.setGrade(course.getGrade());
-                            break;
-                        }
+                if (progress.getSemesters().get(courseSemester).getCourses().contains(course)) {
+                    for (Course semCourse: progress.getSemesters().get(courseSemester).getCourses()) {
+//                        if (semCourse.getId().equals(course.getId()) && semCourse.getGrade().equals("-") && !course.getGrade().equals("-")) {
+//                            semCourse.setExamPeriod(course.getExamPeriod());
+//                            semCourse.setGrade(course.getGrade());
+//                            break;
+//                        }
                     }
                     continue;
                 }
 
                 // add course to semester
-                grades.getSemesters().get(courseSemester).getCourses().add(course);
+                progress.getSemesters().get(courseSemester).getCourses().add(course);
 
                 // calculate passed courses & avg grade
                 if (columns.get(8).text().contains("Επιτυχία")) {
-                    if (course.getExamPeriod().equals("ΑΠΑΛΛΑΓΗ")) {
-                        totalPassedCoursesWithoutGrades++;
-                    } else {
-                        totalPassedCourses++;
-                        semesterPassedCourses[courseSemester]++;
-                        semesterGradesSum[courseSemester] += Double.parseDouble(course.getGrade());
-                    }
+//                    if (course.getExamPeriod().equals("ΑΠΑΛΛΑΓΗ")) {
+//                        totalPassedCoursesWithoutGrades++;
+//                    } else {
+//                        totalPassedCourses++;
+//                        semesterPassedCourses[courseSemester]++;
+//                        semesterGradesSum[courseSemester] += Double.parseDouble(course.getGrade());
+//                    }
                 }
 
                 // set department
-                if (info.getDepartment() == null) {
-                    info.setDepartment(columns.get(22).text());
+                if (info.getDepartmentTitle() == null) {
+                    info.setDepartmentTitle(columns.get(22).text());
                 }
             }
 
             // keep only semesters with courses
             ArrayList<Semester> semesters = new ArrayList<>();
-            for (int index = 0; index < grades.getSemesters().size(); index++) {
-                Semester semester = grades.getSemesters().get(index);
+            for (int index = 0; index < progress.getSemesters().size(); index++) {
+                Semester semester = progress.getSemesters().get(index);
                 if (!semester.getCourses().isEmpty()) {
                     int passedCourses = semesterPassedCourses[index];
                     double avg = semesterGradesSum[index];
                     semester.setPassedCourses(passedCourses);
-                    semester.setGradeAverage((passedCourses == 0) ? "-" : df2.format(avg / passedCourses));
+                    semester.setDisplayAverageGrade((passedCourses == 0) ? "-" : df2.format(avg / passedCourses));
                     semesters.add(semester);
                 }
             }
-            grades.setSemesters(semesters);
-            grades.setTotalPassedCourses(String.valueOf(totalPassedCourses + totalPassedCoursesWithoutGrades));
-            info.setSemester(String.valueOf(semesters.size()));
+            progress.setSemesters(semesters);
+            progress.setDisplayPassedCourses(String.valueOf(totalPassedCourses + totalPassedCoursesWithoutGrades));
+            info.setCurrentSemester(String.valueOf(semesters.size()));
 
             /*
              * Scrape gpa
              */
             Elements lastTableRowData = infoAndGradesPage.select("tbody[id$=-contentTBody]").last().children().last().children();
             if (lastTableRowData.size() < 3) {
-                grades.setTotalAverageGrade("-");
+                progress.setDisplayAverageGrade("-");
             } else {
-                grades.setTotalAverageGrade(lastTableRowData.get(2).text().replace(",", "."));
+                progress.setDisplayAverageGrade(lastTableRowData.get(2).text().replace(",", "."));
             }
 
             student.setInfo(info);
-            student.setGrades(grades);
+            student.setProgress(progress);
             return student;
         } catch (Exception e) {
             logger.error("Error: {}", e.getMessage(), e);
@@ -147,24 +147,24 @@ public class UPATRASParser {
         }
     }
 
-    private Grades initGrades() {
-        Grades grades = new Grades();
+    private Progress initGrades() {
+        Progress progress = new Progress();
 
         ArrayList<Semester> semesters = new ArrayList<>();
         for (int i = 0; i < 12; i++) {
             Semester semester = new Semester();
             semester.setId(i+1);
-            semester.setGradeAverage("-");
+            semester.setDisplayAverageGrade("-");
             semester.setCourses(new ArrayList<>());
             semesters.add(semester);
         }
 
-        grades.setSemesters(semesters);
-        grades.setTotalEcts("0");
-        grades.setTotalPassedCourses("0");
-        grades.setTotalAverageGrade("-");
+        progress.setSemesters(semesters);
+        progress.setDisplayEcts("0");
+        progress.setDisplayPassedCourses("0");
+        progress.setDisplayAverageGrade("-");
 
-        return grades;
+        return progress;
     }
 
     private void setDocument(String document) {

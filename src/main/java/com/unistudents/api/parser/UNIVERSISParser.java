@@ -33,9 +33,9 @@ public class UNIVERSISParser {
             String semester = node.get("semester").asText();
             String department = node.get("department").get("name").asText();
 
-            info.setSemester(semester);
+            info.setCurrentSemester(semester);
             info.setAem(aem);
-            info.setDepartment(department);
+            info.setDepartmentTitle(department);
             info.setFirstName(firstName);
             info.setLastName(lastName);
             info.setRegistrationYear(registrationYear);
@@ -49,8 +49,8 @@ public class UNIVERSISParser {
         }
     }
 
-    private Grades parseGradesJSON(String gradesJSON) {
-        Grades grades = new Grades();
+    private Progress parseGradesJSON(String gradesJSON) {
+        Progress progress = new Progress();
         ArrayList<Semester> semesters = initSemesters();
         DecimalFormat df2 = new DecimalFormat("#.##");
 
@@ -118,11 +118,11 @@ public class UNIVERSISParser {
                             semesterECTS += courseECTS;
                         }
 
-                        course.setExamPeriod(examPeriod);
+//                        course.setExamPeriod(examPeriod);
                         course.setType(type);
                         course.setId(id);
                         course.setName(name);
-                        course.setGrade(grade.replace(".0", ""));
+//                        course.setGrade(grade.replace(".0", ""));
 
                         semester.getCourses().add(course);
                     }
@@ -146,19 +146,19 @@ public class UNIVERSISParser {
                         }
                     }
                 });
-                semester.setEcts(String.valueOf(semesterECTS));
+                semester.setDisplayEcts(String.valueOf(semesterECTS));
                 semester.setPassedCourses(semesterPassedCourses);
-                semester.setGradeAverage(semesterAverageGrade != -1 ? df2.format(semesterAverageGrade) : "-");
+                semester.setDisplayAverageGrade(semesterAverageGrade != -1 ? df2.format(semesterAverageGrade) : "-");
             }
 
-            grades.setSemesters(clearSemesters(semesters));
-            grades.setTotalEcts(String.valueOf(df2.format(totalECTS)).replace(",", ".").replace(".0", ""));
-            grades.setTotalPassedCourses(String.valueOf(totalPassedCourses + totalPassedCoursesWithoutGrades));
+            progress.setSemesters(clearSemesters(semesters));
+            progress.setDisplayEcts(String.valueOf(df2.format(totalECTS)).replace(",", ".").replace(".0", ""));
+            progress.setDisplayPassedCourses(String.valueOf(totalPassedCourses + totalPassedCoursesWithoutGrades));
             double totalAverageGrade = -1;
             if (totalPassedCourses > 0) {
                 totalAverageGrade = (double) Math.round((totalPassedCoursesSum / totalPassedCourses) * 100) / 100;
             }
-            grades.setTotalAverageGrade(totalAverageGrade != -1 ? df2.format(totalAverageGrade) : "-");
+            progress.setDisplayAverageGrade(totalAverageGrade != -1 ? df2.format(totalAverageGrade) : "-");
         } catch (Exception e) {
             logger.error(this.PRE_LOG  + " Error: {}", e.getMessage(), e);
             setException(e);
@@ -166,7 +166,7 @@ public class UNIVERSISParser {
             return null;
         }
 
-        return grades;
+        return progress;
     }
 
     // Clear unwanted semesters from initialization.
@@ -189,7 +189,7 @@ public class UNIVERSISParser {
             semesters[i - 1] = new Semester();
             semesters[i - 1].setId(i);
             semesters[i - 1].setPassedCourses(0);
-            semesters[i - 1].setGradeAverage("-");
+            semesters[i - 1].setDisplayAverageGrade("-");
             semesters[i - 1].setCourses(new ArrayList<>());
         }
         return new ArrayList<>(Arrays.asList(semesters));
@@ -200,14 +200,14 @@ public class UNIVERSISParser {
 
         try {
             Info info = parseInfoJSON(infoJSON);
-            Grades grades = parseGradesJSON(gradesJSON);
+            Progress progress = parseGradesJSON(gradesJSON);
 
-            if (info == null || grades == null) {
+            if (info == null || progress == null) {
                 return null;
             }
 
             student.setInfo(info);
-            student.setGrades(grades);
+            student.setProgress(progress);
 
             return student;
         } catch (Exception e) {

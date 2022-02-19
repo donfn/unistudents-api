@@ -3,7 +3,7 @@ package com.unistudents.api.scraper;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.unistudents.api.common.UserAgentGenerator;
-import com.unistudents.api.model.LoginForm;
+import com.unistudents.api.model.LoginRequest;
 import org.jsoup.Connection;
 import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
@@ -32,14 +32,14 @@ public class ILYDAScraper {
     private Map<String, String> cookies;
     private final Logger logger = LoggerFactory.getLogger(ILYDAScraper.class);
 
-    public ILYDAScraper(LoginForm loginForm, String university, String system, String domain) {
+    public ILYDAScraper(LoginRequest loginRequest, String university, String system, String domain) {
         this.UNIVERSITY = university;
         this.DOMAIN = domain;
         this.PRE_LOG = university + (system == null ? "" : "." + system);
         this.USER_AGENT = UserAgentGenerator.generate();
         this.connected = true;
         this.authorized = true;
-        this.getDocuments(loginForm.getUsername(), loginForm.getPassword(), loginForm.getCookies());
+        this.getDocuments(loginRequest.getUsername(), loginRequest.getPassword(), loginRequest.getSession());
     }
 
     private void getDocuments(String username, String password, Map<String, String> cookies) {

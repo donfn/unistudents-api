@@ -38,8 +38,8 @@ public class SEFParser {
             info.setAem(aem);
             info.setFirstName(firstName);
             info.setLastName(lastName);
-            info.setDepartment(department);
-            info.setSemester(semester);
+            info.setDepartmentTitle(department);
+            info.setCurrentSemester(semester);
             info.setRegistrationYear(String.valueOf(registrationYear));
 
             return info;
@@ -51,9 +51,9 @@ public class SEFParser {
         }
     }
 
-    private Grades parseGradesPage(Document gradesPage, int registrationYear) {
+    private Progress parseGradesPage(Document gradesPage, int registrationYear) {
         DecimalFormat df2 = new DecimalFormat("#.##");
-        Grades grades = new Grades();
+        Progress progress = new Progress();
 
         try {
             // Get first table
@@ -74,9 +74,9 @@ public class SEFParser {
             String totalECTS = passedCourses.last().select("td").last().text();
             int totalPassedCourses = Integer.parseInt(passedCourses.get(passedCourses.size() - 3).select("td").last().text().split(" ")[0].trim());
 
-            grades.setTotalAverageGrade("-");
-            grades.setTotalEcts(totalECTS);
-            grades.setTotalPassedCourses(String.valueOf(totalPassedCourses));
+            progress.setDisplayAverageGrade("-");
+            progress.setDisplayEcts(totalECTS);
+            progress.setDisplayPassedCourses(String.valueOf(totalPassedCourses));
 
             float totalAverageGrade = 0;
             float totalGradesSum = 0;
@@ -104,7 +104,7 @@ public class SEFParser {
                                 totalGradesSum += passedCourseGrade;
                                 _totalPassedCourses++;
                             }
-                            declaredCourse.setGrade(String.valueOf(passedCourseGrade));
+//                            declaredCourse.setGrade(String.valueOf(passedCourseGrade));
                         }
                     }
                 }
@@ -113,19 +113,19 @@ public class SEFParser {
                     semesterAverageGrade = semesterGradesSum / semesterPassedCourses;
                 }
 
-                semester.setGradeAverage(semesterPassedCourses > 0 ? df2.format(semesterAverageGrade) : "-");
+                semester.setDisplayAverageGrade(semesterPassedCourses > 0 ? df2.format(semesterAverageGrade) : "-");
                 semester.setPassedCourses(semesterPassedCourses);
-                semester.setEcts(String.valueOf(semesterECTS));
+                semester.setDisplayEcts(String.valueOf(semesterECTS));
             }
 
             if (totalPassedCourses > 0) {
                 totalAverageGrade = totalGradesSum / _totalPassedCourses;
             }
 
-            grades.setTotalAverageGrade(totalPassedCourses > 0 ? df2.format(totalAverageGrade) : "-");
-            grades.setSemesters(filledAnalyticalCourses);
+            progress.setDisplayAverageGrade(totalPassedCourses > 0 ? df2.format(totalAverageGrade) : "-");
+            progress.setSemesters(filledAnalyticalCourses);
 
-            return grades;
+            return progress;
         } catch (Exception e) {
             setException(e);
             setDocument(gradesPage.outerHtml() + "\n\n=====\n\n" + registrationYear);
@@ -143,10 +143,10 @@ public class SEFParser {
             if (info == null) return null;
 
             // We have to pass registration year in order to calculate invalid semester value.
-            Grades grades = parseGradesPage(gradesPage, Integer.parseInt(info.getRegistrationYear()));
+            Progress progress = parseGradesPage(gradesPage, Integer.parseInt(info.getRegistrationYear()));
 
             student.setInfo(info);
-            student.setGrades(grades);
+            student.setProgress(progress);
 
             return student;
         } catch (Exception e) {
@@ -175,8 +175,8 @@ public class SEFParser {
                     Course courseObj = new Course();
                     courseObj.setId(courseId);
                     courseObj.setName(courseName);
-                    courseObj.setGrade(courseGrade);
-                    courseObj.setExamPeriod("-");
+//                    courseObj.setGrade(courseGrade);
+//                    courseObj.setExamPeriod("-");
                     courseObj.setType("-");
 
                     analyticalCourses.add(courseObj);
@@ -209,7 +209,7 @@ public class SEFParser {
                             String courseType = course.get(5).text();
                             String courseExamPeriod = course.get(8).text();
 
-                            analyticalCourse.setExamPeriod(courseExamPeriod);
+//                            analyticalCourse.setExamPeriod(courseExamPeriod);
                             analyticalCourse.setType(courseType);
 
                             String semesterId;
@@ -283,7 +283,7 @@ public class SEFParser {
                             String examPeriod = passedCourse.select("td").get(8).text();
 
                             analyticalCourse.setType(courseType);
-                            analyticalCourse.setExamPeriod(examPeriod);
+//                            analyticalCourse.setExamPeriod(examPeriod);
 
                             String semesterId = "";
                             if (mathCourses.get(courseId) != null) {
@@ -337,7 +337,7 @@ public class SEFParser {
             semesters[i - 1] = new Semester();
             semesters[i - 1].setId(i);
             semesters[i - 1].setPassedCourses(0);
-            semesters[i - 1].setGradeAverage("-");
+            semesters[i - 1].setDisplayAverageGrade("-");
             semesters[i - 1].setCourses(new ArrayList<>());
         }
         return new ArrayList<>(Arrays.asList(semesters));

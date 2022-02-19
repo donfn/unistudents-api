@@ -19,7 +19,7 @@ public class ICARUSParser {
     public Student parseInfoAndGradesPages(Document infoAndGradePage) {
         DecimalFormat df2 = new DecimalFormat("#.##");
         Student student = new Student();
-        Grades grades = initGrades();
+        Progress progress = initGrades();
         Info info = new Info();
 
         // get some information
@@ -30,7 +30,7 @@ public class ICARUSParser {
             String[] moreInfo = infoAndGradePage.select("#wrapper #content #tabs-1 #stylized > h2").text().split(" ");
             info.setAem(moreInfo[2]);
             info.setRegistrationYear(moreInfo[moreInfo.length - 1]);
-            info.setDepartment("Μηχανικών Πληροφοριακών και Επικοινωνιακών Συστημάτων");
+            info.setDepartmentTitle("Μηχανικών Πληροφοριακών και Επικοινωνιακών Συστημάτων");
 
             double totalSum = 0;
             int totalPassedCourses = 0;
@@ -44,13 +44,13 @@ public class ICARUSParser {
                 Course course = new Course();
                 course.setId(courseInfo.get(1).text().trim());
                 course.setName(courseInfo.get(2).text().trim());
-                course.setGrade(courseInfo.get(3).text().trim());
-                course.setExamPeriod(courseInfo.get(6).text().trim());
+//                course.setGrade(courseInfo.get(3).text().trim());
+//                course.setExamPeriod(courseInfo.get(6).text().trim());
                 String semesterId = courseInfo.get(4).text().trim();
                 String status = courseInfo.get(7).text().trim();
                 if (status.equals("Δε δόθηκε")) {
-                    course.setGrade("-");
-                    course.setExamPeriod("-");
+//                    course.setGrade("-");
+//                    course.setExamPeriod("-");
                 }
 
                 boolean found = false;
@@ -60,14 +60,14 @@ public class ICARUSParser {
                     Course semCourse = semester.getCourses().get(c);
                     if (semCourse.getId().equals(course.getId())) {
                         if (status.contains("Επιτυχία")) {
-                            if (semCourse.getGrade().equals("-")) {
-                                semester.getCourses().remove(semCourse);
-                                break;
-                            }
-                            if (Double.parseDouble(semCourse.getGrade()) < 5) {
-                                semester.getCourses().remove(semCourse);
-                                break;
-                            }
+//                            if (semCourse.getGrade().equals("-")) {
+//                                semester.getCourses().remove(semCourse);
+//                                break;
+//                            }
+//                            if (Double.parseDouble(semCourse.getGrade()) < 5) {
+//                                semester.getCourses().remove(semCourse);
+//                                break;
+//                            }
                         }
                         found = true;
                         break;
@@ -77,10 +77,10 @@ public class ICARUSParser {
                 if (!found) {
                     semester.getCourses().add(course);
                     if (status.equals("Επιτυχία")) {
-                        double grade = Double.parseDouble(course.getGrade());
-                        semesterSum[semesterIndex] += grade;
-                        semesterPassedCourses[semesterIndex]++;
-                        totalSum += grade;
+//                        double grade = Double.parseDouble(course.getGrade());
+//                        semesterSum[semesterIndex] += grade;
+//                        semesterPassedCourses[semesterIndex]++;
+//                        totalSum += grade;
                     }
                 }
             }
@@ -91,18 +91,18 @@ public class ICARUSParser {
                 int passedCourses = semesterPassedCourses[s];
                 totalPassedCourses += passedCourses;
                 semester.setPassedCourses(passedCourses);
-                semester.setGradeAverage((passedCourses == 0) ? "-" : df2.format(semesterSum[s] / passedCourses));
+                semester.setDisplayAverageGrade((passedCourses == 0) ? "-" : df2.format(semesterSum[s] / passedCourses));
                 if (semester.getCourses().size() > 0)
                     semestersToAdd.add(semester);
             }
 
-            info.setSemester(String.valueOf(semestersToAdd.size()));
-            grades.setSemesters(semestersToAdd);
-            grades.setTotalAverageGrade((totalPassedCourses == 0) ? "-" : df2.format(totalSum / totalPassedCourses));
-            grades.setTotalPassedCourses(String.valueOf(totalPassedCourses));
+            info.setCurrentSemester(String.valueOf(semestersToAdd.size()));
+            progress.setSemesters(semestersToAdd);
+            progress.setDisplayAverageGrade((totalPassedCourses == 0) ? "-" : df2.format(totalSum / totalPassedCourses));
+            progress.setDisplayPassedCourses(String.valueOf(totalPassedCourses));
 
             student.setInfo(info);
-            student.setGrades(grades);
+            student.setProgress(progress);
             return student;
         } catch (Exception e) {
             logger.error("[AEGEAN.ICARUS] Error: {}", e.getMessage(), e);
@@ -112,13 +112,13 @@ public class ICARUSParser {
         }
     }
 
-    private Grades initGrades() {
-        Grades grades = new Grades();
-        grades.setTotalAverageGrade("-");
-        grades.setTotalEcts("-");
-        grades.setTotalPassedCourses("0");
-        grades.setSemesters(new ArrayList<>());
-        return grades;
+    private Progress initGrades() {
+        Progress progress = new Progress();
+        progress.setDisplayAverageGrade("-");
+        progress.setDisplayEcts("-");
+        progress.setDisplayPassedCourses("0");
+        progress.setSemesters(new ArrayList<>());
+        return progress;
     }
 
     private ArrayList<Semester> initSemesters() {
@@ -127,7 +127,7 @@ public class ICARUSParser {
             semesters[i-1] = new Semester();
             semesters[i-1].setId(i);
             semesters[i-1].setPassedCourses(0);
-            semesters[i-1].setGradeAverage("-");
+            semesters[i-1].setDisplayAverageGrade("-");
             semesters[i-1].setCourses(new ArrayList<>());
         }
         return new ArrayList<>(Arrays.asList(semesters));

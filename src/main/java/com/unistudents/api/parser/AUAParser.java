@@ -28,8 +28,8 @@ public class AUAParser {
             info.setFirstName(fullName[1]);
             info.setLastName(fullName[0]);
 
-            info.setDepartment(infoPage.select(".nicetable > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(2) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(2) > td:nth-child(1) > strong:nth-child(1)").text());
-            info.setSemester(infoPage.select(".nicetable > tbody:nth-child(1) > tr:nth-child(4) > td:nth-child(1) > table:nth-child(1) > tbody:nth-child(1)").select("td[style]").last().text());
+            info.setDepartmentTitle(infoPage.select(".nicetable > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(2) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(2) > td:nth-child(1) > strong:nth-child(1)").text());
+            info.setCurrentSemester(infoPage.select(".nicetable > tbody:nth-child(1) > tr:nth-child(4) > td:nth-child(1) > table:nth-child(1) > tbody:nth-child(1)").select("td[style]").last().text());
             String[] registrationYear = infoPage.select(".nicetable > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(2) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(3) > strong:nth-child(1)").text().split("/");
             info.setRegistrationYear("ΠΡΟΓΡΑΜΜΑ ΣΠΟΥΔΩΝ " + registrationYear[registrationYear.length - 1]);
 
@@ -39,7 +39,7 @@ public class AUAParser {
             // Add total average grade
             variousInfoList.add(infoPage.select(".nicetable > tbody > tr:nth-child(1) > td:nth-child(2) > table > tbody > tr:nth-child(4) > td:nth-child(2) > div > div:nth-child(1) > strong:nth-child(4)").text().replace(",", "."));
             // Add semester
-            variousInfoList.add(Integer.parseInt(info.getSemester()));
+            variousInfoList.add(Integer.parseInt(info.getCurrentSemester()));
 
             return variousInfoList;
         } catch (Exception e) {
@@ -50,14 +50,14 @@ public class AUAParser {
         }
     }
 
-    private Grades parseGradesPage(Document gradesPage, String totalPassedCourses, String totalAverageGrade, Integer currentSemester) {
+    private Progress parseGradesPage(Document gradesPage, String totalPassedCourses, String totalAverageGrade, Integer currentSemester) {
         DecimalFormat df2 = new DecimalFormat("#.##");
-        Grades grades = new Grades();
+        Progress progress = new Progress();
 
         // Set known values
-        grades.setTotalAverageGrade(totalAverageGrade);
-        grades.setTotalPassedCourses(totalPassedCourses);
-        grades.setTotalEcts("-");
+        progress.setDisplayAverageGrade(totalAverageGrade);
+        progress.setDisplayPassedCourses(totalPassedCourses);
+        progress.setDisplayEcts("-");
 
         Semester semesterObj;
 
@@ -105,9 +105,9 @@ public class AUAParser {
 
                                 if (noWritten) {
                                     theoryCourseObj = new Course();
-                                    theoryCourseObj.setGrade("-");
+//                                    theoryCourseObj.setGrade("-");
                                     theoryCourseObj.setId(theoryCourseId);
-                                    theoryCourseObj.setExamPeriod("-");
+//                                    theoryCourseObj.setExamPeriod("-");
                                     theoryCourseObj.setName(courseName);
 
                                     semesterObj.getCourses().add(theoryCourseObj);
@@ -133,9 +133,9 @@ public class AUAParser {
                                             }
 
                                             theoryCourseObj = new Course();
-                                            theoryCourseObj.setGrade(theoryGrade);
+//                                            theoryCourseObj.setGrade(theoryGrade);
                                             theoryCourseObj.setId(theoryCourseId);
-                                            theoryCourseObj.setExamPeriod(theoryExamPeriod);
+//                                            theoryCourseObj.setExamPeriod(theoryExamPeriod);
                                             theoryCourseObj.setName(courseName);
                                         } else {
                                             labExamPeriod = StringHelper.removeTones(infoTable.get(2).text().toUpperCase()) + " " + infoTable.get(1).text();
@@ -143,17 +143,17 @@ public class AUAParser {
                                             labCourseId = theoryCourseId + " - ΕΡΓΑΣΤΗΡΙΟ";
 
                                             labCourseObj = new Course();
-                                            labCourseObj.setGrade(labGrade);
+//                                            labCourseObj.setGrade(labGrade);
                                             labCourseObj.setId(labCourseId);
-                                            labCourseObj.setExamPeriod(labExamPeriod);
+//                                            labCourseObj.setExamPeriod(labExamPeriod);
                                             labCourseObj.setName(courseName);
                                         }
                                     } else {
                                         if (!noWritten) {
                                             theoryCourseObj = new Course();
-                                            theoryCourseObj.setGrade("-");
+//                                            theoryCourseObj.setGrade("-");
                                             theoryCourseObj.setId(theoryCourseId);
-                                            theoryCourseObj.setExamPeriod("-");
+//                                            theoryCourseObj.setExamPeriod("-");
                                             theoryCourseObj.setName(courseName);
                                         }
                                     }
@@ -170,19 +170,19 @@ public class AUAParser {
                                 if (!isException) {
                                     float gradeToCompute;
                                     if (labCourseObj != null) {
-                                        gradeToCompute = Float.parseFloat(labCourseObj.getGrade());
-                                        if (!labCourseObj.getGrade().equals("-") &&  gradeToCompute>= 5) {
-                                            passedCourses++;
-                                            passedCoursesSum += gradeToCompute;
-                                        }
+//                                        gradeToCompute = Float.parseFloat(labCourseObj.getGrade());
+//                                        if (!labCourseObj.getGrade().equals("-") &&  gradeToCompute>= 5) {
+//                                            passedCourses++;
+//                                            passedCoursesSum += gradeToCompute;
+//                                        }
                                     }
 
                                     if (theoryCourseObj != null) {
-                                        gradeToCompute = Float.parseFloat(theoryCourseObj.getGrade());
-                                        if (!theoryCourseObj.getGrade().equals("-") && gradeToCompute >= 5) {
-                                            passedCourses++;
-                                            passedCoursesSum += gradeToCompute;
-                                        }
+//                                        gradeToCompute = Float.parseFloat(theoryCourseObj.getGrade());
+//                                        if (!theoryCourseObj.getGrade().equals("-") && gradeToCompute >= 5) {
+//                                            passedCourses++;
+//                                            passedCoursesSum += gradeToCompute;
+//                                        }
                                     }
                                 }
                             }
@@ -195,14 +195,14 @@ public class AUAParser {
                     }
 
                     semesterObj.setPassedCourses(passedCourses);
-                    semesterObj.setGradeAverage((passedCourses != 0) ? df2.format(gradeAverage) : "-");
-                    semesterObj.setEcts("-");
+                    semesterObj.setDisplayAverageGrade((passedCourses != 0) ? df2.format(gradeAverage) : "-");
+                    semesterObj.setDisplayEcts("-");
                 }
 
-                grades.getSemesters().add(semesterObj);
+                progress.getSemesters().add(semesterObj);
             }
 
-            return grades;
+            return progress;
         } catch (Exception e) {
             logger.error("Error: {}", e.getMessage(), e);
             setException(e);
@@ -217,10 +217,10 @@ public class AUAParser {
         try {
             List infoPageList = parseInfoPage(infoPage);
             Info info = (Info) infoPageList.get(0);
-            Grades grades = parseGradesPage(gradesPage, (String) infoPageList.get(1), (String) infoPageList.get(2), (Integer) infoPageList.get(3));
+            Progress progress = parseGradesPage(gradesPage, (String) infoPageList.get(1), (String) infoPageList.get(2), (Integer) infoPageList.get(3));
 
             student.setInfo(info);
-            student.setGrades(grades);
+            student.setProgress(progress);
 
             return student;
         } catch (Exception e) {

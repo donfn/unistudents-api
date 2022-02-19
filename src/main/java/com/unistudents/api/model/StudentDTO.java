@@ -1,47 +1,19 @@
 package com.unistudents.api.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.util.Map;
 
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class StudentDTO {
+    private String university;
     private String system;
-    private Map<String, String> cookies;
+    private Map<String, String> session;
     private Student student;
-
-    public StudentDTO() {
-    }
-
-    public StudentDTO(Map<String, String> cookies, Student student) {
-        this.cookies = cookies;
-        this.student = student;
-    }
-
-    public StudentDTO(String system, Map<String, String> cookies, Student student) {
-        this.system = system;
-        this.cookies = cookies;
-        this.student = student;
-    }
-
-    public String getSystem() {
-        return system;
-    }
-
-    public void setSystem(String system) {
-        this.system = system;
-    }
-
-    public Map<String, String> getCookies() {
-        return cookies;
-    }
-
-    public void setCookies(Map<String, String> cookies) {
-        this.cookies = cookies;
-    }
-
-    public Student getStudent() {
-        return student;
-    }
-
-    public void setStudent(Student student) {
-        this.student = student;
-    }
 }

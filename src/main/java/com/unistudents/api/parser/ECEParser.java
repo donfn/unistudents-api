@@ -1,7 +1,7 @@
 package com.unistudents.api.parser;
 
 import com.unistudents.api.model.Course;
-import com.unistudents.api.model.Grades;
+import com.unistudents.api.model.Progress;
 import com.unistudents.api.model.Semester;
 import com.unistudents.api.model.Student;
 import org.jsoup.nodes.Document;
@@ -20,7 +20,7 @@ public class ECEParser {
 
     public Student parseGradeDocument(Document gradeDocument) {
         Student student = new Student();
-        Grades grades = initGrades();
+        Progress progress = initGrades();
         ArrayList<Semester> semesters = initSemesters();
 
         try {
@@ -43,8 +43,8 @@ public class ECEParser {
                         normalGrade = normalGrade.split(" ")[0];
                         if (normalGrade.contains("Προβιβάστηκε")) normalGrade = "P";
                         if (normalGrade.contains("Απέτυχε")) normalGrade = "F";
-                        course.setGrade(normalGrade);
-                        course.setExamPeriod("Κανονική " + elCourseFields.get(2).select("span").first().attributes().get("title").split(" ")[2].split("-")[0]);
+//                        course.setGrade(normalGrade);
+//                        course.setExamPeriod("Κανονική " + elCourseFields.get(2).select("span").first().attributes().get("title").split(" ")[2].split("-")[0]);
                     }
 
                     String septGrade = elCourseFields.get(3).text().trim();
@@ -52,8 +52,8 @@ public class ECEParser {
                         septGrade = septGrade.split(" ")[0];
                         if (septGrade.contains("Προβιβάστηκε")) septGrade = "P";
                         if (septGrade.contains("Απέτυχε")) septGrade = "F";
-                        course.setGrade(septGrade);
-                        course.setExamPeriod("Επαναληπτική " + elCourseFields.get(3).select("span").first().attributes().get("title").split(" ")[2].split("-")[0]);
+//                        course.setGrade(septGrade);
+//                        course.setExamPeriod("Επαναληπτική " + elCourseFields.get(3).select("span").first().attributes().get("title").split(" ")[2].split("-")[0]);
                     }
 
                     String extraGrade = elCourseFields.get(4).text().trim();
@@ -61,12 +61,12 @@ public class ECEParser {
                         extraGrade = extraGrade.split(" ")[0];
                         if (extraGrade.contains("Προβιβάστηκε")) extraGrade = "P";
                         if (extraGrade.contains("Απέτυχε")) extraGrade = "F";
-                        course.setGrade(extraGrade);
-                        course.setExamPeriod("Επιπλέον " + elCourseFields.get(4).select("span").first().attributes().get("title").split(" ")[2].split("-")[0]);
+//                        course.setGrade(extraGrade);
+//                        course.setExamPeriod("Επιπλέον " + elCourseFields.get(4).select("span").first().attributes().get("title").split(" ")[2].split("-")[0]);
                     }
 
-                    if (course.getGrade() == null)
-                        course.setGrade("-");
+//                    if (course.getGrade() == null)
+//                        course.setGrade("-");
 
                     semesters.get(semesterIndex - 1).getCourses().add(course);
                 }
@@ -78,8 +78,8 @@ public class ECEParser {
                     semestersToAdd.add(semester);
             }
 
-            grades.setSemesters(semestersToAdd);
-            student.setGrades(grades);
+            progress.setSemesters(semestersToAdd);
+            student.setProgress(progress);
             return student;
         } catch (Exception e) {
             e.printStackTrace();
@@ -90,13 +90,13 @@ public class ECEParser {
         }
     }
 
-    private Grades initGrades() {
-        Grades grades = new Grades();
-        grades.setTotalAverageGrade("-");
-        grades.setTotalEcts("-");
-        grades.setTotalPassedCourses("0");
-        grades.setSemesters(new ArrayList<>());
-        return grades;
+    private Progress initGrades() {
+        Progress progress = new Progress();
+        progress.setDisplayAverageGrade("-");
+        progress.setDisplayEcts("-");
+        progress.setDisplayPassedCourses("0");
+        progress.setSemesters(new ArrayList<>());
+        return progress;
     }
 
     private ArrayList<Semester> initSemesters() {
@@ -105,7 +105,7 @@ public class ECEParser {
             semesters[i-1] = new Semester();
             semesters[i-1].setId(i);
             semesters[i-1].setPassedCourses(0);
-            semesters[i-1].setGradeAverage("-");
+            semesters[i-1].setDisplayAverageGrade("-");
             semesters[i-1].setCourses(new ArrayList<>());
         }
         return new ArrayList<>(Arrays.asList(semesters));

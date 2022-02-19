@@ -36,14 +36,14 @@ public class PANTEIONParser {
             info.setAem(aem);
             info.setFirstName(firstName);
             info.setLastName(lastName);
-            info.setDepartment(department);
-            info.setSemester(semester);
+            info.setDepartmentTitle(department);
+            info.setCurrentSemester(semester);
             info.setRegistrationYear(registrationYear);
 
             // Setting info
             student.setInfo(info);
 
-            Grades results = new Grades();
+            Progress results = new Progress();
             Semester semesterObj;
             Course courseObj;
 
@@ -104,8 +104,8 @@ public class PANTEIONParser {
                                         courseObj.setId(id);
                                         courseObj.setName(name);
                                         courseObj.setType(courseType);
-                                        courseObj.setGrade(grade[0]);
-                                        courseObj.setExamPeriod(examPeriod);
+//                                        courseObj.setGrade(grade[0]);
+//                                        courseObj.setExamPeriod(examPeriod);
                                         semesterObj.getCourses().add(courseObj);
 
                                         // We exclude exception courses
@@ -131,8 +131,8 @@ public class PANTEIONParser {
                 }
 
                 semesterObj.setPassedCourses(passedCourses);
-                semesterObj.setGradeAverage((passedCourses != 0) ? df2.format(gradeAverage) : "-");
-                semesterObj.setEcts(String.valueOf(ects));
+                semesterObj.setDisplayAverageGrade((passedCourses != 0) ? df2.format(gradeAverage) : "-");
+                semesterObj.setDisplayEcts(String.valueOf(ects));
                 if (semesterObj.getCourses().size() > 0)
                     results.getSemesters().add(semesterObj);
             }
@@ -140,12 +140,12 @@ public class PANTEIONParser {
             if (totalPassedCoursesWithGrade != 0)
                 totalAverageGrade = totalPassedCoursesSum / totalPassedCoursesWithGrade;
 
-            results.setTotalPassedCourses(String.valueOf(totalPassedCourses));
-            results.setTotalAverageGrade((totalPassedCoursesWithGrade != 0) ? df2.format(totalAverageGrade) : "-");
-            results.setTotalEcts(String.valueOf(totalEcts));
+            results.setDisplayPassedCourses(String.valueOf(totalPassedCourses));
+            results.setDisplayAverageGrade((totalPassedCoursesWithGrade != 0) ? df2.format(totalAverageGrade) : "-");
+            results.setDisplayEcts(String.valueOf(totalEcts));
 
             // Setting grades
-            student.setGrades(results);
+            student.setProgress(results);
             return student;
         } catch (Exception e) {
             logger.error("Error: {}", e.getMessage(), e);

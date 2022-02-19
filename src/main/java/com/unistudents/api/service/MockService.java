@@ -29,8 +29,8 @@ public class MockService {
         switch (university) {
             case "AEGEAN":
                 switch (system) {
-                    case "CARDISOFT":
-                        return getCARDISOFTStudent();
+//                    case "CARDISOFT":
+//                        return getCARDISOFTStudent();
                     case "SEF":
                         return null;
                     case "ICARUS":
@@ -74,28 +74,28 @@ public class MockService {
                 return getARCHIMEDIAStudent();
             case "NTUA":
                 return getNTUAStudent();
-            case "IHU":
-                return getCARDISOFTStudent();
-            case "UOP":
-                return getCARDISOFTStudent();
+//            case "IHU":
+//                return getCARDISOFTStudent();
+//            case "UOP":
+//                return getCARDISOFTStudent();
             case "UOI":
                 return getILYDAStudent();
             case "UNIWA":
                 return getILYDAStudent();
-            case "UNIPI":
-                return getCARDISOFTStudent();
-            case "UOC":
-                return getCARDISOFTStudent();
+//            case "UNIPI":
+//                return getCARDISOFTStudent();
+//            case "UOC":
+//                return getCARDISOFTStudent();
             case "TUC":
                 return getUNIVERSISStudent();
-            case "UOWM":
-                return getCARDISOFTStudent();
-            case "HMU":
-                return getCARDISOFTStudent();
-            case "IONIO":
-                return getCARDISOFTStudent();
-            case "ASPETE":
-                return getCARDISOFTStudent();
+//            case "UOWM":
+//                return getCARDISOFTStudent();
+//            case "HMU":
+//                return getCARDISOFTStudent();
+//            case "IONIO":
+//                return getCARDISOFTStudent();
+//            case "ASPETE":
+//                return getCARDISOFTStudent();
             default:
                 System.out.println("Whaaat?");
                 return new ResponseEntity(HttpStatus.NOT_FOUND);
@@ -125,7 +125,7 @@ public class MockService {
             PANTEIONParser parser = new PANTEIONParser();
             Student student = parser.parseInfoAndGradesPages(infoAndGradesPages);
 
-            StudentDTO studentDTO = new StudentDTO(null, null, student);
+            StudentDTO studentDTO = new StudentDTO("PANTEION", null, null, student);
 
             return new ResponseEntity(studentDTO, HttpStatus.OK);
         } catch (IOException e) {
@@ -142,7 +142,7 @@ public class MockService {
             UPATRASParser parser = new UPATRASParser();
             Student student = parser.parseInfoAndGradesPage(infoAndGradesPage);
 
-            StudentDTO studentDTO = new StudentDTO(null, null, student);
+            StudentDTO studentDTO = new StudentDTO("UPATRAS", null, null, student);
 
             return new ResponseEntity(studentDTO, HttpStatus.OK);
         } catch (IOException e) {
@@ -159,7 +159,7 @@ public class MockService {
             ARCHIMEDIAParser parser = new ARCHIMEDIAParser();
             Student student = parser.parseInfoAndGradesPages(document);
 
-            StudentDTO studentDTO = new StudentDTO(null, null, student);
+            StudentDTO studentDTO = new StudentDTO("AUEB", null, null, student);
 
             return new ResponseEntity(studentDTO, HttpStatus.OK);
         } catch (IOException e) {
@@ -178,7 +178,7 @@ public class MockService {
             NTUAParser parser = new NTUAParser();
             Student student = parser.parseJSONAndDocument(infoAndGradesJSON, infoAndGradePage);
 
-            StudentDTO studentDTO = new StudentDTO(null, null, student);
+            StudentDTO studentDTO = new StudentDTO("NTUA", null, null, student);
 
             return new ResponseEntity(studentDTO, HttpStatus.OK);
         } catch (IOException e) {
@@ -187,25 +187,25 @@ public class MockService {
         }
     }
 
-    private ResponseEntity getCARDISOFTStudent() {
-        try {
-            String htmlInfo = readFile("src/main/resources/UOC/uoc-info.html");
-            String htmlGrades = readFile("src/main/resources/UOC/uoc.html");
-
-            Document documentInfo = Jsoup.parse(htmlInfo);
-            Document documentGrades = Jsoup.parse(htmlGrades);
-
-            CardisoftParser parser = new CardisoftParser("MOCK", null);
-            Student student = parser.parseInfoAndGradesPages(documentInfo, documentGrades);
-
-            StudentDTO studentDTO = new StudentDTO(null, null, student);
-
-            return new ResponseEntity(studentDTO, HttpStatus.OK);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
+//    private ResponseEntity getCARDISOFTStudent() {
+//        try {
+//            String htmlInfo = readFile("src/main/resources/UOC/uoc-info.html");
+//            String htmlGrades = readFile("src/main/resources/UOC/uoc.html");
+//
+//            Document documentInfo = Jsoup.parse(htmlInfo);
+//            Document documentGrades = Jsoup.parse(htmlGrades);
+//
+//            CardisoftParser parser = new CardisoftParser("MOCK", null);
+//            Student student = parser.parseInfoAndGradesPages(documentInfo, documentGrades);
+//
+//            StudentDTO studentDTO = new StudentDTO(null, null, student);
+//
+//            return new ResponseEntity(studentDTO, HttpStatus.OK);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            return null;
+//        }
+//    }
 
     private ResponseEntity getTEIWESTStudent() {
         try {
@@ -224,7 +224,7 @@ public class MockService {
                 put("AspxAutoDetectCookieSupport", "1");
             }};
 
-            StudentDTO studentDTO = new StudentDTO(null, cookies, student);
+            StudentDTO studentDTO = new StudentDTO("TEIWEST", null, cookies, student);
 
             return new ResponseEntity(studentDTO, HttpStatus.OK);
         } catch (IOException e) {
@@ -241,7 +241,7 @@ public class MockService {
             UNIVERSISParser parser = new UNIVERSISParser("TUC");
             Student student = parser.parseInfoAndGradesJSON(infoJSON, gradesJSON);
 
-            StudentDTO studentDTO = new StudentDTO(null, null, student);
+            StudentDTO studentDTO = new StudentDTO("UNIVERSIS", null, null, student);
 
             return new ResponseEntity(studentDTO, HttpStatus.OK);
         } catch (IOException e) {
@@ -259,7 +259,7 @@ public class MockService {
             ILYDAParser parser = new ILYDAParser("MOCK", null);
             Student student = parser.parseInfoAndGradesJSON(infoJSON, gradesJSON, totalAverageGrade);
 
-            StudentDTO studentDTO = new StudentDTO(null, null, student);
+            StudentDTO studentDTO = new StudentDTO("UOI", null, null, student);
 
             return new ResponseEntity(studentDTO, HttpStatus.OK);
         } catch (IOException e) {
@@ -279,7 +279,7 @@ public class MockService {
             AUAParser parser = new AUAParser();
             Student student = parser.parseInfoAndGradesPages(infoPage, gradesPage);
 
-            StudentDTO studentDTO = new StudentDTO(null, null, student);
+            StudentDTO studentDTO = new StudentDTO("AUA", null, null, student);
 
             return new ResponseEntity(studentDTO, HttpStatus.OK);
         } catch (IOException e) {
@@ -297,7 +297,7 @@ public class MockService {
             ICARUSParser parser = new ICARUSParser();
             Student student = parser.parseInfoAndGradesPages(infoAndGradePage);
 
-            StudentDTO studentDTO = new StudentDTO(null, null, student);
+            StudentDTO studentDTO = new StudentDTO("AEGEAN", null, null, student);
 
             return new ResponseEntity(studentDTO, HttpStatus.OK);
         } catch (IOException e) {

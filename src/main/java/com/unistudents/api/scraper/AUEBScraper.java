@@ -1,7 +1,7 @@
 package com.unistudents.api.scraper;
 
 import com.unistudents.api.common.UserAgentGenerator;
-import com.unistudents.api.model.LoginForm;
+import com.unistudents.api.model.LoginRequest;
 import org.jsoup.Connection;
 import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
@@ -26,12 +26,12 @@ public class AUEBScraper {
     private Map<String, String> cookies;
     private final Logger logger = LoggerFactory.getLogger(AUEBScraper.class);
 
-    public AUEBScraper(LoginForm loginForm) {
+    public AUEBScraper(LoginRequest loginRequest) {
         this.connected = true;
         this.authorized = true;
         USER_AGENT = UserAgentGenerator.generate();
         PRE_LOG = "AUEB";
-        this.getDocuments(loginForm.getUsername(), loginForm.getPassword(), loginForm.getCookies());
+        this.getDocuments(loginRequest.getUsername(), loginRequest.getPassword(), loginRequest.getSession());
     }
 
     private void getDocuments(String username, String password, Map<String, String> cookies) {

@@ -1,23 +1,64 @@
 package com.unistudents.api.parser;
 
+import com.unistudents.api.common.Integration;
 import com.unistudents.api.model.*;
+import com.unistudents.api.scraper.CardisoftScraper;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
-public class CardisoftParser {
-    private Exception exception;
-    private String document;
-    private final String PRE_LOG;
+@Service
+public class CardisoftParser extends Parser {
     private final Logger logger = LoggerFactory.getLogger(CardisoftParser.class);
 
-    public CardisoftParser(String university, String system) {
-        this.PRE_LOG = university + (system == null ? "" : "." + system);
+    @Override
+    public List<Integration> getIntegrations() {
+        return Arrays.asList(
+                Integration.IHU_TEITHE,
+                Integration.IHU_CM,
+                Integration.IHU_TEIEMT,
+                Integration.UOP_MAIN,
+                Integration.UOP_TEIPEL,
+                Integration.UNIPI,
+                Integration.UOWM,
+                Integration.ASPETE
+        );
+    }
+
+    @Override
+    public Student parseStudent(Map<String, Object> scrapedData, Integration integration) {
+        init(integration);
+        Student student = new Student();
+        Document infoPage = (Document) scrapedData.get(CardisoftScraper.Docs.INFO_PAGE.toString());
+        Document gradesPage = (Document) scrapedData.get(CardisoftScraper.Docs.GRADES_PAGE.toString());
+
+        try {
+            Info info = parseInfoPage(infoPage);
+            Progress progress = parseGradesPage(gradesPage);
+
+            if (info == null || progress == null) {
+                return null;
+            }
+
+            student.setInfo(info);
+            student.setProgress(progress);
+
+            return student;
+        } catch (Exception e) {
+            logger.error("[" + PRE_LOG + "] Error: {}", e.getMessage(), e);
+            setException(e);
+            setDocument(infoPage + "\n\n=====\n\n" + gradesPage);
+            return null;
+        }
     }
 
     private Info parseInfoPage(Document infoPage) {
@@ -33,8 +74,8 @@ public class CardisoftParser {
 
             for (int i = 4; i < els.size(); i++) {
                 if (els.get(i).children().first().text().contains("Τμήμα")) {
-                    info.setDepartment(els.get(i).children().last().text());
-                    info.setSemester(els.get(++i).children().last().text());
+                    info.setDepartmentTitle(els.get(i).children().last().text());
+                    info.setCurrentSemester(els.get(++i).children().last().text());
                     info.setRegistrationYear(els.get(++i).children().last().text());
                     break;
                 }
@@ -48,13 +89,13 @@ public class CardisoftParser {
         }
     }
 
-    private Grades parseGradesPage(Document gradesPage) {
+    private Progress parseGradesPage(Document gradesPage) {
         if (gradesPage.outerHtml().contains("Δε βρέθηκαν αποτελέσματα εξετάσεων")) {
-            Grades results = new Grades();
+            Progress results = new Progress();
             results.setSemesters(new ArrayList<>());
-            results.setTotalEcts("0");
-            results.setTotalPassedCourses("0");
-            results.setTotalAverageGrade("-");
+            results.setEcts(0);
+            results.setPassedCourses(0);
+            results.setAverageGrade(0);
             return results;
         }
 
@@ -67,7 +108,8 @@ public class CardisoftParser {
         Elements table = elements.getElementsByAttributeValue("cellspacing", "0");
         if (table == null) return null;
 
-        Grades results = new Grades();
+        Progress results = new Progress();
+        results.setSemesters(new ArrayList<>());
         Semester semesterObj = null;
         Course courseObj;
         boolean foundValidSem = false;
@@ -80,6 +122,7 @@ public class CardisoftParser {
                 if (semester != null) {
                     if (!semester.text().equals("")) {
                         semesterObj = new Semester();
+                        semesterObj.setCourses(new ArrayList<>());
 
                         // set semester id
                         String[] semString = semester.text().split(" ");
@@ -111,21 +154,27 @@ public class CardisoftParser {
                             courseObj.setId(name.substring(name.indexOf("(") + 1, name.indexOf(")")));
 
                             courseObj.setType(tds.get(2).text());
-                            courseObj.setGrade(tds.get(tds.size() - 2).text().replace(",", "."));
-                            courseObj.setExamPeriod(tds.get(tds.size() - 1).text());
+//                            courseObj.setGrade(tds.get(tds.size() - 2).text().replace(",", "."));
+//                            courseObj.setExamPeriod(tds.get(tds.size() - 1).text());
 
-                            if (!courseObj.getGrade().contains("-")) {
-                                if (courseObj.getGrade().equals("ΕΠΙΤ")) {
-                                    courseObj.setGrade("P");
-                                } else if (courseObj.getGrade().equals("ΑΝΕΠ")) {
-                                    courseObj.setGrade("F");
+                            ExamGrade examGrade = ExamGrade.builder()
+                                    .displayGrade(tds.get(tds.size() - 2).text().replace(",", "."))
+                                    .displayPeriod(tds.get(tds.size() - 1).text())
+                                    .build();
+
+                            if (!examGrade.getDisplayGrade().contains("-")) {
+                                if (examGrade.getDisplayGrade().equals("ΕΠΙΤ")) {
+                                    examGrade.setDisplayGrade("P");
+                                } else if (examGrade.getDisplayGrade().equals("ΑΝΕΠ")) {
+                                    examGrade.setDisplayGrade("F");
                                 } else {
-                                    double gradeD = Double.parseDouble(courseObj.getGrade());
+                                    double gradeD = Double.parseDouble(examGrade.getDisplayGrade());
                                     if (gradeD >= 5) {
                                         semesterSum[semesterObj.getId() - 1] += gradeD;
                                     }
                                 }
                             }
+                            courseObj.setLatestExamGrade(examGrade);
                             semesterObj.getCourses().add(courseObj);
                         }
                     }
@@ -143,7 +192,7 @@ public class CardisoftParser {
                             if (elPassesCourses != null) {
                                 if (results.getSemesters().contains(semesterObj)) {
                                     if (elPassesCourses.text().length() == 0) continue;
-                                    results.setTotalPassedCourses(elPassesCourses.text().substring(elPassesCourses.text().length() - 2));
+                                    results.setDisplayPassedCourses(elPassesCourses.text().substring(elPassesCourses.text().length() - 2));
                                 } else {
                                     int passedCourses = Integer.parseInt(elPassesCourses.text().substring(elPassesCourses.text().length() - 1));
                                     semesterObj.setPassedCourses(passedCourses);
@@ -170,11 +219,11 @@ public class CardisoftParser {
                                 ects = els.last().text();
 
                                 if (results.getSemesters().contains(semesterObj)) {
-                                    results.setTotalAverageGrade((average.equals("") ? "-" : average));
-                                    results.setTotalEcts(ects);
+                                    results.setDisplayAverageGrade((average.equals("") ? "-" : average));
+                                    results.setDisplayEcts(ects);
                                 } else {
-                                    semesterObj.setGradeAverage((average.equals("") ? "-" : average));
-                                    semesterObj.setEcts(ects);
+                                    semesterObj.setDisplayAverageGrade((average.equals("") ? "-" : average));
+                                    semesterObj.setDisplayEcts(ects);
                                 }
                             }
                         }
@@ -227,44 +276,5 @@ public class CardisoftParser {
             default:
                 return Integer.parseInt(semesterString);
         }
-    }
-
-    public Student parseInfoAndGradesPages(Document infoPage, Document gradesPage) {
-        Student student = new Student();
-
-        try {
-            Info info = parseInfoPage(infoPage);
-            Grades grades = parseGradesPage(gradesPage);
-
-            if (info == null || grades == null) {
-                return null;
-            }
-
-            student.setInfo(info);
-            student.setGrades(grades);
-
-            return student;
-        } catch (Exception e) {
-            logger.error("[" + PRE_LOG + "] Error: {}", e.getMessage(), e);
-            setException(e);
-            setDocument(infoPage.outerHtml());
-            return null;
-        }
-    }
-
-    private void setDocument(String document) {
-        this.document = document;
-    }
-
-    public String getDocument() {
-        return this.document;
-    }
-
-    private void setException(Exception exception) {
-        this.exception = exception;
-    }
-
-    public Exception getException() {
-        return exception;
     }
 }

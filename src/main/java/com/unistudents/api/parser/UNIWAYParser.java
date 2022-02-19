@@ -30,7 +30,7 @@ public class UNIWAYParser {
             info.setAem(aem);
 
             String department = node.get("data").get("enrolments").get(0).get("department").asText();
-            info.setDepartment(department);
+            info.setDepartmentTitle(department);
 
             String year = node.get("data").get("enrolments").get(0).get("inscriptionAcYear").asText();
             info.setRegistrationYear("ΕΤΟΣ ΕΓΓΡΑΦΗΣ " + year);
@@ -44,8 +44,8 @@ public class UNIWAYParser {
         }
     }
 
-    private Grades parseGradesJSON(String gradesJSON, String declareHistoryJSON) {
-        Grades grades = new Grades();
+    private Progress parseGradesJSON(String gradesJSON, String declareHistoryJSON) {
+        Progress progress = new Progress();
         DecimalFormat df2 = new DecimalFormat("#.##");
 
         double totalGradesSum = 0;
@@ -57,11 +57,11 @@ public class UNIWAYParser {
         List<String> courses = new ArrayList<>();
         ArrayList<Semester> semesters = getDeclaredCourses(declareHistoryJSON);
         if (semesters == null) {
-            grades.setTotalAverageGrade("-");
-            grades.setTotalEcts("-");
-            grades.setTotalPassedCourses("0");
-            grades.setSemesters(new ArrayList<>());
-            return grades;
+            progress.setDisplayAverageGrade("-");
+            progress.setDisplayEcts("-");
+            progress.setDisplayPassedCourses("0");
+            progress.setSemesters(new ArrayList<>());
+            return progress;
         }
 
         try {
@@ -85,8 +85,8 @@ public class UNIWAYParser {
                         Course recognizedCourse = new Course();
                         recognizedCourse.setId(courseId);
                         recognizedCourse.setName(gradeNode.get("title").asText().trim());
-                        recognizedCourse.setExamPeriod(examPeriod);
-                        recognizedCourse.setGrade("");
+//                        recognizedCourse.setExamPeriod(examPeriod);
+//                        recognizedCourse.setGrade("");
                         courses.add(courseId);
                         semesters.get(semesterId).getCourses().add(recognizedCourse);
                         totalRecognizedCourses++;
@@ -99,18 +99,18 @@ public class UNIWAYParser {
                     boolean founded = false;
                     for (Course course : semesters.get(semesterId).getCourses()) {
                         if (course.getId().equals(courseId)) {
-                            if (course.getExamPeriod().equals("-")) {
-                                course.setGrade(grade);
-                                course.setExamPeriod(examPeriod);
-                                courses.add(courseId);
-                            } else {
-                                if (course.getExamPeriod().split("-")[1].equals(examPeriod.split("-")[1])) {
-                                    course.setGrade(grade);
-                                    course.setExamPeriod(examPeriod);
-                                } else {
-                                    exists = true;
-                                }
-                            }
+//                            if (course.getExamPeriod().equals("-")) {
+//                                course.setGrade(grade);
+//                                course.setExamPeriod(examPeriod);
+//                                courses.add(courseId);
+//                            } else {
+//                                if (course.getExamPeriod().split("-")[1].equals(examPeriod.split("-")[1])) {
+//                                    course.setGrade(grade);
+//                                    course.setExamPeriod(examPeriod);
+//                                } else {
+//                                    exists = true;
+//                                }
+//                            }
                             founded = true;
                             break;
                         }
@@ -121,8 +121,8 @@ public class UNIWAYParser {
                         Course course = new Course();
                         course.setId(courseId);
                         course.setName(gradeNode.get("title").asText().trim());
-                        course.setExamPeriod(examPeriod);
-                        course.setGrade(grade);
+//                        course.setExamPeriod(examPeriod);
+//                        course.setGrade(grade);
 
                         boolean foundCourse = false;
                         for (Semester semester : semesters) {
@@ -134,14 +134,14 @@ public class UNIWAYParser {
                                     doesCourseExistsInMultipleSemesters = true;
                                     foundCourse = true;
 
-                                    if (!duplicateCourse.getExamPeriod().equals("-") && (semester.getId() > semesterId + 1)) {
-                                        course.setGrade(duplicateCourse.getGrade());
-                                        course.setExamPeriod(duplicateCourse.getExamPeriod());
-                                    } else if ((semester.getId() < semesterId + 1) && isNumeric(course.getGrade()) && Double.parseDouble(course.getGrade()) >= 5) {
-                                        duplicateCourse.setGrade(course.getGrade());
-                                        duplicateCourse.setExamPeriod(course.getExamPeriod());
-                                        doesCourseExistsInMultipleSemesters = false;
-                                    }
+//                                    if (!duplicateCourse.getExamPeriod().equals("-") && (semester.getId() > semesterId + 1)) {
+//                                        course.setGrade(duplicateCourse.getGrade());
+//                                        course.setExamPeriod(duplicateCourse.getExamPeriod());
+//                                    } else if ((semester.getId() < semesterId + 1) && isNumeric(course.getGrade()) && Double.parseDouble(course.getGrade()) >= 5) {
+//                                        duplicateCourse.setGrade(course.getGrade());
+//                                        duplicateCourse.setExamPeriod(course.getExamPeriod());
+//                                        doesCourseExistsInMultipleSemesters = false;
+//                                    }
 
                                     break;
                                 }
@@ -171,7 +171,7 @@ public class UNIWAYParser {
                 Semester semester = semesters.get(i);
                 int semesterPassedCourses = semester.getPassedCourses();
                 totalPassedCourses += semesterPassedCourses;
-                semester.setGradeAverage((semesterPassedCourses != 0) ?
+                semester.setDisplayAverageGrade((semesterPassedCourses != 0) ?
                         String.valueOf(df2.format(semesterGradesSum[i] / semesterPassedCourses)) : "-");
             }
 
@@ -182,11 +182,11 @@ public class UNIWAYParser {
                 }
             }
 
-            grades.setSemesters(semestersToReturn);
-            grades.setTotalPassedCourses(String.valueOf(totalPassedCourses + totalRecognizedCourses));
-            grades.setTotalAverageGrade((totalPassedCourses != 0) ? df2.format(totalGradesSum / totalPassedCourses) : "-");
-            grades.setTotalEcts((totalEcts == 0) ? "-" : df2.format(totalEcts).replace("00", ""));
-            return grades;
+            progress.setSemesters(semestersToReturn);
+            progress.setDisplayPassedCourses(String.valueOf(totalPassedCourses + totalRecognizedCourses));
+            progress.setDisplayAverageGrade((totalPassedCourses != 0) ? df2.format(totalGradesSum / totalPassedCourses) : "-");
+            progress.setDisplayEcts((totalEcts == 0) ? "-" : df2.format(totalEcts).replace("00", ""));
+            return progress;
         } catch (Exception e) {
             logger.error("Error: {}", e.getMessage(), e);
             setException(e);
@@ -209,8 +209,8 @@ public class UNIWAYParser {
                     Course course = new Course();
                     course.setId(courseNode.get("displayCode").asText().trim());
                     course.setName(courseNode.get("title").asText().trim());
-                    course.setGrade("-");
-                    course.setExamPeriod("-");
+//                    course.setGrade("-");
+//                    course.setExamPeriod("-");
 
                     boolean exists = false;
                     for (Course c : courses) {
@@ -244,7 +244,7 @@ public class UNIWAYParser {
             semesters[i-1] = new Semester();
             semesters[i-1].setId(i);
             semesters[i-1].setPassedCourses(0);
-            semesters[i-1].setGradeAverage("-");
+            semesters[i-1].setDisplayAverageGrade("-");
             semesters[i-1].setCourses(new ArrayList<>());
         }
         return new ArrayList<>(Arrays.asList(semesters));
@@ -266,14 +266,14 @@ public class UNIWAYParser {
 
         try {
             Info info = parseInfoJSON(infoJSON);
-            Grades grades = parseGradesJSON(gradesJSON, declareHistoryJSON);
+            Progress progress = parseGradesJSON(gradesJSON, declareHistoryJSON);
 
-            if (info == null || grades == null) {
+            if (info == null || progress == null) {
                 return null;
             }
 
             student.setInfo(info);
-            student.setGrades(grades);
+            student.setProgress(progress);
 
             return student;
         } catch (Exception e) {

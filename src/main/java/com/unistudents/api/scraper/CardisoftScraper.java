@@ -1,9 +1,7 @@
 package com.unistudents.api.scraper;
 
-
+import com.unistudents.api.common.Integration;
 import com.unistudents.api.common.Services;
-import com.unistudents.api.common.UserAgentGenerator;
-import com.unistudents.api.model.LoginForm;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 import org.jsoup.Connection;
@@ -12,50 +10,43 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-public class CardisoftScraper {
-    private final String SYSTEM;
-    private final String DOMAIN;
-    private final String URL;
-    private final String PRE_LOG;
-    private final String USER_AGENT;
-    private boolean connected;
-    private boolean authorized;
-    private Document studentInfoPage;
-    private Document gradesPage;
-    private Map<String, String> cookies;
+@Service
+public class CardisoftScraper extends Scraper {
+    public enum Docs {
+        INFO_PAGE,
+        GRADES_PAGE
+    }
+
     private final Logger logger = LoggerFactory.getLogger(CardisoftScraper.class);
 
-    public CardisoftScraper(LoginForm loginForm, String university, String system, String domain, String pathURL, boolean SSL) {
-        this.SYSTEM = system;
-        this.DOMAIN = domain;
-        this.URL = ((SSL) ? "https://" : "http://") + domain + pathURL;
-        this.PRE_LOG = university + (system == null ? "" : "." + system);
-        this.connected = true;
-        this.authorized = true;
-        USER_AGENT = UserAgentGenerator.generate();
-        getDocuments(loginForm.getUsername(), loginForm.getPassword(), loginForm.getCookies());
+    @Override
+    public List<Integration> getIntegrations() {
+        return Arrays.asList(
+            Integration.IHU_TEITHE,
+            Integration.IHU_CM,
+            Integration.IHU_TEIEMT,
+            Integration.UOP_MAIN,
+            Integration.UOP_TEIPEL,
+            Integration.UNIPI,
+            Integration.UOWM,
+            Integration.ASPETE
+        );
     }
 
-    private void getDocuments(String username, String password, Map<String, String> cookies) {
-        if (cookies == null) {
-            getHtmlPages(username, password);
-        } else {
-            getHtmlPages(cookies);
-            if (studentInfoPage == null || gradesPage == null) {
-                getHtmlPages(username, password);
-            }
-        }
-    }
-
-    private void getHtmlPages(String username, String password) {
+    @Override
+    Map<String, Object> getScrapedData(String username, String password) {
+        Map<String, Object> scrapedData = new HashMap<>();
         username = username.trim();
         password = password.trim();
 
@@ -71,7 +62,7 @@ public class CardisoftScraper {
             response = getResponse(USER_AGENT);
 
             // check for connection errors
-            if (response == null) return;
+            if (response == null) return null;
 
             loginPage = String.valueOf(response.parse());
         } catch (IOException e) {
@@ -124,10 +115,10 @@ public class CardisoftScraper {
         } catch (SocketTimeoutException | UnknownHostException | HttpStatusException | ConnectException connException) {
             connected = false;
             logger.warn("[" + PRE_LOG + "] Warning: {}", connException.getMessage(), connException);
-            return;
+            return null;
         } catch (IOException e) {
             logger.error("[" + PRE_LOG + "] Error: {}", e.getMessage(), e);
-            return;
+            return null;
         }
 
         // returned document from login response
@@ -145,7 +136,7 @@ public class CardisoftScraper {
         //
         if (!authorized) {
             this.authorized = false;
-            return;
+            return null;
         }
         else {
             this.authorized = true;
@@ -153,19 +144,19 @@ public class CardisoftScraper {
 
         // if server is not responding
         if (returnedDoc.toString().contains("An operation error occurred. (AuthPublisherObject)") ||
-            returnedDoc.toString().contains("The LDAP server is unavailable. (AuthPublisherObject)") ||
-            returnedDoc.toString().contains("Συνέβη σφάλμα. H ενέργεια αυτή προκάλεσε σφάλμα συστήματος. Παρακαλούμε προσπαθήστε αργότερα.")) {
+                returnedDoc.toString().contains("The LDAP server is unavailable. (AuthPublisherObject)") ||
+                returnedDoc.toString().contains("Συνέβη σφάλμα. H ενέργεια αυτή προκάλεσε σφάλμα συστήματος. Παρακαλούμε προσπαθήστε αργότερα.")) {
             connected = false;
-            return;
+            return null;
         }
 
         if (!response.url().toString().contains("studentMain.asp")) {
             logger.error("[" + PRE_LOG + "] Error: Invalid response URL {}", response.url().toString());
-            return;
+            return null;
         }
 
         // set student info page
-        setStudentInfoPage(returnedDoc);
+        scrapedData.put(Docs.INFO_PAGE.toString(), returnedDoc);
 
         // add cookies
         for (Map.Entry<String, String> entry : response.cookies().entrySet()) {
@@ -193,22 +184,26 @@ public class CardisoftScraper {
         } catch (SocketTimeoutException | UnknownHostException | HttpStatusException | ConnectException connException) {
             connected = false;
             logger.warn("[" + PRE_LOG + "] Warning: {}", connException.getMessage(), connException);
-            return;
+            return null;
         } catch (IOException e) {
             logger.error("[" + PRE_LOG + "] Error: {}", e.getMessage(), e);
-            return;
+            return null;
         }
 
         // set grades page
         try {
-            setGradesPage(response.parse());
-            setCookies(cookies);
+            scrapedData.put(Docs.GRADES_PAGE.toString(), response.parse());
+            setSession(cookies);
+            return scrapedData;
         } catch (IOException e) {
             logger.error("[" + PRE_LOG + "] Error: {}", e.getMessage(), e);
+            return null;
         }
     }
 
-    private void getHtmlPages(Map<String, String> cookies) {
+    @Override
+    Map<String, Object> getScrapedData(Map<String, String> session) {
+        Map<String, Object> scrapedData = new HashMap<>();
         Connection.Response response;
 
         //
@@ -225,24 +220,24 @@ public class CardisoftScraper {
                     .header("Host", DOMAIN)
                     .header("Upgrade-Insecure-Requests", "1")
                     .header("User-Agent", USER_AGENT)
-                    .cookies(cookies)
+                    .cookies(session)
                     .followRedirects(false)
                     .method(Connection.Method.GET)
                     .execute();
         } catch (SocketTimeoutException | UnknownHostException | HttpStatusException | ConnectException connException) {
             connected = false;
             logger.warn("[" + PRE_LOG + "] Warning: {}", connException.getMessage(), connException);
-            return;
+            return null;
         } catch (IOException e) {
             logger.error("[" + PRE_LOG + "] Error: {}", e.getMessage(), e);
-            return;
+            return null;
         }
 
         // set info page
         try {
-            if (response.statusCode() != 200) return;
+            if (response.statusCode() != 200) return null;
             Document infoPage = response.parse();
-            setStudentInfoPage(infoPage);
+            scrapedData.put(Docs.INFO_PAGE.toString(), infoPage);
         } catch (IOException e) {
             logger.error("[" + PRE_LOG + "] Error: {}", e.getMessage(), e);
         }
@@ -262,24 +257,26 @@ public class CardisoftScraper {
                     .header("Referer", URL + "/studentMain.asp")
                     .header("Upgrade-Insecure-Requests", "1")
                     .header("User-Agent", USER_AGENT)
-                    .cookies(cookies)
+                    .cookies(session)
                     .method(Connection.Method.GET)
                     .execute();
         } catch (SocketTimeoutException | UnknownHostException | HttpStatusException | ConnectException connException) {
             connected = false;
             logger.warn("[" + PRE_LOG + "] Warning: {}", connException.getMessage(), connException);
-            return;
+            return null;
         } catch (IOException e) {
             logger.error("[" + PRE_LOG + "] Error: {}", e.getMessage(), e);
-            return;
+            return null;
         }
 
         // set grades page
         try {
-            setGradesPage(response.parse());
-            setCookies(cookies);
+            scrapedData.put(Docs.GRADES_PAGE.toString(), response.parse());
+            setSession(session);
+            return scrapedData;
         } catch (IOException e) {
             logger.error("[" + PRE_LOG + "] Error: {}", e.getMessage(), e);
+            return null;
         }
     }
 
@@ -306,30 +303,6 @@ public class CardisoftScraper {
             logger.error("[" + PRE_LOG + "] Error: {}", e.getMessage(), e);
         }
         return null;
-    }
-
-    public boolean isConnected() {
-        return connected;
-    }
-
-    public boolean isAuthorized() {
-        return authorized;
-    }
-
-    public Document getStudentInfoPage() {
-        return studentInfoPage;
-    }
-
-    private void setStudentInfoPage(Document studentInfoPage) {
-        this.studentInfoPage = studentInfoPage;
-    }
-
-    public Document getGradesPage() {
-        return gradesPage;
-    }
-
-    private void setGradesPage(Document gradesPage) {
-        this.gradesPage = gradesPage;
     }
 
     private String[] getKeyValue(String loginPage) {
@@ -418,13 +391,5 @@ public class CardisoftScraper {
         return !(html.contains("Λάθος όνομα χρήστη ή κωδικού πρόσβασης") ||
                 html.contains("Λάθος όνομα χρήστη") ||
                 html.contains("Ο χρήστης δεν έχει πρόσβαση στην εφαρμογή"));
-    }
-
-    public Map<String, String> getCookies() {
-        return cookies;
-    }
-
-    public void setCookies(Map<String, String> cookies) {
-        this.cookies = cookies;
     }
 }

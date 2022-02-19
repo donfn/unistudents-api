@@ -32,10 +32,10 @@ public class ARCHIMEDIAParser {
             info.setAem(studentData.select("Mhtrwo").text());
             info.setFirstName(personalData.select("FirstName").text());
             info.setLastName(personalData.select("SurName").text());
-            info.setDepartment(studentData.select("DeptPrg").attr("title"));
+            info.setDepartmentTitle(studentData.select("DeptPrg").attr("title"));
 
             String semester = studentData.select("TrexonEksamFoit").attr("v");
-            info.setSemester(semester);
+            info.setCurrentSemester(semester);
             info.setRegistrationYear(StringHelper.removeTones(studentData.select("ProgramEisagwgis").attr("title").toUpperCase()));
             student.setInfo(info);
         } catch (Exception e) {
@@ -51,12 +51,12 @@ public class ARCHIMEDIAParser {
             if (declaredCourses == null) return null;
 
             Elements gradeElements = infoAndGradePage.select("Bathmologies > R");
-            Grades grades = parseGrades(declaredCourses, gradeElements);
-            if (grades == null) return null;
+            Progress progress = parseGrades(declaredCourses, gradeElements);
+            if (progress == null) return null;
 
-            grades.setTotalAverageGrade(df2.format(Float.parseFloat(studentData.select("ProgressInd").attr("v"))));
-            grades.setTotalEcts(studentData.select("ProgressInd2").attr("v").replace(".0", ""));
-            student.setGrades(grades);
+//            progress.setTotalAverageGrade(df2.format(Float.parseFloat(studentData.select("ProgressInd").attr("v"))));
+//            progress.setTotalEcts(studentData.select("ProgressInd2").attr("v").replace(".0", ""));
+//            student.setGrades(progress);
         } catch (Exception e) {
             logger.error("Error: {}", e.getMessage(), e);
             setException(e);
@@ -67,9 +67,9 @@ public class ARCHIMEDIAParser {
         return student;
     }
 
-    private Grades parseGrades(ArrayList<Semester> declaresSemesters, Elements gradeElements) {
+    private Progress parseGrades(ArrayList<Semester> declaresSemesters, Elements gradeElements) {
         DecimalFormat df2 = new DecimalFormat("#.##");
-        Grades grades = initGrades();
+        Progress progress = initGrades();
         ArrayList<Semester> semestersToAdd = new ArrayList<>();
 
         int totalPassedCourses = 0;
@@ -119,9 +119,9 @@ public class ARCHIMEDIAParser {
                 Course course = new Course();
                 course.setId(courseId);
                 course.setName(courseName);
-                course.setGrade(courseGrade);
+//                course.setGrade(courseGrade);
                 course.setType(courseType);
-                course.setExamPeriod(courseExamPeriod);
+//                course.setExamPeriod(courseExamPeriod);
 
                 boolean found = false;
                 int semesterIndex = Integer.parseInt(semestedId) - 1;
@@ -130,21 +130,21 @@ public class ARCHIMEDIAParser {
                     for (int c = 0; c < semester.getCourses().size(); c++) {
                         Course semCourse = semester.getCourses().get(c);
                         if (course.getId().equals(semCourse.getId())) {
-                            if (semCourse.getGrade().equals("-")) {
-                                semCourse.setGrade(course.getGrade());
-                                semCourse.setExamPeriod(course.getExamPeriod());
-                                semCourse.setType(course.getType());
-
-                                if (!courseGrade.equals("")) {
-                                    double grade = Double.parseDouble(courseGrade);
-                                    if (grade >= 5 && grade <= 10) {
-                                        semesterSum[s] += grade;
-                                        semesterPassedCourses[s]++;
-                                    }
-                                } else {
-                                    totalPassedCourses++;
-                                }
-                            }
+//                            if (semCourse.getGrade().equals("-")) {
+//                                semCourse.setGrade(course.getGrade());
+//                                semCourse.setExamPeriod(course.getExamPeriod());
+//                                semCourse.setType(course.getType());
+//
+//                                if (!courseGrade.equals("")) {
+//                                    double grade = Double.parseDouble(courseGrade);
+//                                    if (grade >= 5 && grade <= 10) {
+//                                        semesterSum[s] += grade;
+//                                        semesterPassedCourses[s]++;
+//                                    }
+//                                } else {
+//                                    totalPassedCourses++;
+//                                }
+//                            }
                             found = true;
                             break;
                         }
@@ -170,7 +170,7 @@ public class ARCHIMEDIAParser {
                 int passedCourses = semesterPassedCourses[index];
                 totalPassedCourses += passedCourses;
                 semester.setPassedCourses(passedCourses);
-                semester.setGradeAverage((passedCourses == 0) ? "-" : df2.format(semesterSum[index] / passedCourses));
+                semester.setDisplayAverageGrade((passedCourses == 0) ? "-" : df2.format(semesterSum[index] / passedCourses));
                 if (semester.getCourses().size() > 0)
                     semestersToAdd.add(semester);
             }
@@ -181,9 +181,9 @@ public class ARCHIMEDIAParser {
             return null;
         }
 
-        grades.setTotalPassedCourses(String.valueOf(totalPassedCourses));
-        grades.setSemesters(semestersToAdd);
-        return grades;
+        progress.setDisplayPassedCourses(String.valueOf(totalPassedCourses));
+        progress.setSemesters(semestersToAdd);
+        return progress;
     }
 
     private ArrayList<Semester> getDeclaredCourses(Elements declared) {
@@ -213,8 +213,8 @@ public class ARCHIMEDIAParser {
                     Course courseObj = new Course();
                     courseObj.setId(courseId);
                     courseObj.setName(courseName);
-                    courseObj.setGrade("-");
-                    courseObj.setExamPeriod("-");
+//                    courseObj.setGrade("-");
+//                    courseObj.setExamPeriod("-");
                     courseObj.setType("");
 
                     Semester semester = semesters.get(Integer.parseInt(semesterId) - 1);
@@ -231,13 +231,13 @@ public class ARCHIMEDIAParser {
         return semesters;
     }
 
-    private Grades initGrades() {
-        Grades grades = new Grades();
-        grades.setTotalAverageGrade("-");
-        grades.setTotalEcts("-");
-        grades.setTotalPassedCourses("0");
-        grades.setSemesters(new ArrayList<>());
-        return grades;
+    private Progress initGrades() {
+        Progress progress = new Progress();
+        progress.setDisplayAverageGrade("-");
+        progress.setDisplayEcts("-");
+        progress.setDisplayPassedCourses("0");
+        progress.setSemesters(new ArrayList<>());
+        return progress;
     }
 
     private ArrayList<Semester> initSemesters() {
@@ -246,7 +246,7 @@ public class ARCHIMEDIAParser {
             semesters[i-1] = new Semester();
             semesters[i-1].setId(i);
             semesters[i-1].setPassedCourses(0);
-            semesters[i-1].setGradeAverage("-");
+            semesters[i-1].setDisplayAverageGrade("-");
             semesters[i-1].setCourses(new ArrayList<>());
         }
         return new ArrayList<>(Arrays.asList(semesters));

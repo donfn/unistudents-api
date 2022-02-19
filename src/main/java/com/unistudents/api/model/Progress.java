@@ -11,11 +11,11 @@ import java.util.ArrayList;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Semester {
-    private int id;
-    private String name;
+public class Progress {
     private int passedCourses;
+    private String displayPassedCourses;
     private int failedCourses;
+    private String displayFailedCourses;
     private double averageGrade;
     private String displayAverageGrade;
     private double weightedAverageGrade;
@@ -24,5 +24,5 @@ public class Semester {
     private String displayEcts;
     private int credits;
     private String displayCredits;
-    private ArrayList<Course> courses;
+    private ArrayList<Semester> semesters;
 }

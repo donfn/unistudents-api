@@ -38,9 +38,9 @@ public class TEIWESTParser {
             info.setAem(aem);
             info.setFirstName(firstName);
             info.setLastName(lastName);
-            info.setDepartment(department);
+            info.setDepartmentTitle(department);
             info.setRegistrationYear(registrationYear);
-            info.setSemester(semester);
+            info.setCurrentSemester(semester);
 
             return info;
         } catch (Exception e) {
@@ -51,8 +51,8 @@ public class TEIWESTParser {
         }
     }
 
-    private Grades parseGradesPage(Document gradePage) {
-        Grades grades = initGrades();
+    private Progress parseGradesPage(Document gradePage) {
+        Progress progress = initGrades();
         ArrayList<Semester> semesters = initSemesters();
         DecimalFormat df2 = new DecimalFormat("#.##");
 
@@ -78,12 +78,12 @@ public class TEIWESTParser {
                     Course course = new Course();
                     course.setName(els.get(3).text());
                     course.setType(els.get(5).text());
-                    course.setExamPeriod(els.get(1).text());
+//                    course.setExamPeriod(els.get(1).text());
                     course.setId(course.getName().replace(" ", "").trim() +
                             course.getType().replace(" ", "").trim());
 
                     String grade = els.get(6).text().replace(",", ".").replace(".00", "");
-                    course.setGrade(grade);
+//                    course.setGrade(grade);
 
                     double gradeToCompute = Double.parseDouble(grade);
                     if (gradeToCompute >= 5) {
@@ -100,22 +100,22 @@ public class TEIWESTParser {
 
                     if (semesterPassedCourses > 0) {
                         double averageGrade = (double) Math.round((semesterGradeSum / semesterPassedCourses) * 100) / 100;
-                        semester.setGradeAverage(df2.format(averageGrade));
+                        semester.setDisplayAverageGrade(df2.format(averageGrade));
                     } else {
-                        semester.setGradeAverage("-");
+                        semester.setDisplayAverageGrade("-");
                     }
                 }
             }
 
 
             clearSemesters(semesters);
-            grades.setSemesters(semesters);
-            grades.setTotalPassedCourses(String.valueOf(totalPassedCourses));
+            progress.setSemesters(semesters);
+            progress.setDisplayPassedCourses(String.valueOf(totalPassedCourses));
             if (totalPassedCourses > 0) {
                 double averageGrade = (double) Math.round((totalGradeSum / totalPassedCourses) * 100) / 100;
-                grades.setTotalAverageGrade(df2.format(averageGrade));
+                progress.setDisplayAverageGrade(df2.format(averageGrade));
             } else {
-                grades.setTotalAverageGrade("-");
+                progress.setDisplayAverageGrade("-");
             }
         } catch (Exception e) {
             logger.error(this.PRE_LOG + " Error: {}", e.getMessage(), e);
@@ -124,7 +124,7 @@ public class TEIWESTParser {
             return null;
         }
 
-        return grades;
+        return progress;
     }
 
     private ArrayList<Semester> clearSemesters(ArrayList<Semester> semesters) {
@@ -145,20 +145,20 @@ public class TEIWESTParser {
             semesters[i - 1] = new Semester();
             semesters[i - 1].setId(i);
             semesters[i - 1].setPassedCourses(0);
-            semesters[i - 1].setGradeAverage("-");
-            semesters[i - 1].setEcts("-");
+            semesters[i - 1].setDisplayAverageGrade("-");
+            semesters[i - 1].setDisplayEcts("-");
             semesters[i - 1].setCourses(new ArrayList<>());
         }
         return new ArrayList<>(Arrays.asList(semesters));
     }
 
-    private Grades initGrades() {
-        Grades grades = new Grades();
-        grades.setTotalAverageGrade("-");
-        grades.setTotalEcts("-");
-        grades.setTotalPassedCourses("0");
-        grades.setSemesters(new ArrayList<>());
-        return grades;
+    private Progress initGrades() {
+        Progress progress = new Progress();
+        progress.setDisplayAverageGrade("-");
+        progress.setDisplayEcts("-");
+        progress.setDisplayPassedCourses("0");
+        progress.setSemesters(new ArrayList<>());
+        return progress;
     }
 
     public Student parseInfoAndGradesDocuments(Document infoPage, Document gradesPage) {
@@ -166,14 +166,14 @@ public class TEIWESTParser {
 
         try {
             Info info = parseInfoPage(infoPage);
-            Grades grades = parseGradesPage(gradesPage);
+            Progress progress = parseGradesPage(gradesPage);
 
-            if (info == null || grades == null) {
+            if (info == null || progress == null) {
                 return null;
             }
 
             student.setInfo(info);
-            student.setGrades(grades);
+            student.setProgress(progress);
 
             return student;
         } catch (Exception e) {

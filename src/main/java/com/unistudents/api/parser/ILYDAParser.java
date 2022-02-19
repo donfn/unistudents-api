@@ -39,7 +39,7 @@ public class ILYDAParser {
                 info.setLastName(lastName);
 
                 String department = student.get("departmentTitle").asText();
-                info.setDepartment(department);
+                info.setDepartmentTitle(department);
 
                 String registrationYear = student.get("programTitle").asText();
                 info.setRegistrationYear(registrationYear);
@@ -53,8 +53,8 @@ public class ILYDAParser {
         }
     }
 
-    private Grades parseGradesJSON(String gradesJSON, String totalAverageGrade) {
-        Grades grades = new Grades();
+    private Progress parseGradesJSON(String gradesJSON, String totalAverageGrade) {
+        Progress progress = new Progress();
         ArrayList<Semester> semesters = initSemesters();
         DecimalFormat df2 = new DecimalFormat("#.##");
 
@@ -67,11 +67,11 @@ public class ILYDAParser {
             if (studentCourses == null) studentCourses = node;
 
             if (studentCourses.size() == 0) {
-                grades.setTotalAverageGrade("-");
-                grades.setTotalPassedCourses("0");
-                grades.setTotalEcts("0");
-                grades.setSemesters(new ArrayList<>());
-                return grades;
+                progress.setDisplayAverageGrade("-");
+                progress.setDisplayPassedCourses("0");
+                progress.setDisplayEcts("0");
+                progress.setSemesters(new ArrayList<>());
+                return progress;
             }
 
             for (JsonNode courseJSON: studentCourses)  {
@@ -97,24 +97,24 @@ public class ILYDAParser {
 
                 double grade = 0;
                 if (courseJSON.get("grade").isNull()) {
-                    course.setGrade("-");
+//                    course.setGrade("-");
                 } else {
                     grade = courseJSON.get("grade").asDouble() * 10;
-                    course.setGrade(df2.format(grade));
+//                    course.setGrade(df2.format(grade));
                 }
 
                 if (!courseJSON.get("examPeriodId").isNull()) {
                     JsonNode examPeriod = courseJSON.get("examPeriodId");
                     if (examPeriod.get("title") != null) {
                         String examPeriodTitle = examPeriod.get("title").asText();
-                        course.setExamPeriod(examPeriodTitle);
+//                        course.setExamPeriod(examPeriodTitle);
                     }
                 } else if (!courseJSON.get("homologationTypeId").isNull()) {
                     JsonNode homologationTypeId = courseJSON.get("homologationTypeId");
                     String examPeriodTitle = homologationTypeId.get("title").asText();
-                    course.setExamPeriod(examPeriodTitle);
+//                    course.setExamPeriod(examPeriodTitle);
                 } else {
-                    course.setExamPeriod("-");
+//                    course.setExamPeriod("-");
                 }
 
                 String s = courseJSON.get("idFather").asText();
@@ -127,19 +127,19 @@ public class ILYDAParser {
                             double ects = courseJSON.get("ects").asDouble();
                             totalEcts += ects;
 
-                            int semesterEcts = Integer.parseInt(semester.getEcts());
+                            int semesterEcts = Integer.parseInt(semester.getDisplayEcts());
                             semesterEcts += ects;
-                            semester.setEcts(String.valueOf(semesterEcts));
+                            semester.setDisplayEcts(String.valueOf(semesterEcts));
 
-                            if (semester.getGradeAverage().equals("-")) {
-                                semester.setGradeAverage(String.valueOf(grade));
-                                semesterCount[studentSemester-1] = 1;
-                            } else {
-                                double semesterAverageGrade = Double.parseDouble(semester.getGradeAverage());
-                                semesterAverageGrade += grade;
-                                semester.setGradeAverage(String.valueOf(semesterAverageGrade));
-                                semesterCount[studentSemester-1]++;
-                            }
+//                            if (semester.getAverageGrade().equals("-")) {
+//                                semester.setDisplayAverageGrade(String.valueOf(grade));
+//                                semesterCount[studentSemester-1] = 1;
+//                            } else {
+//                                double semesterAverageGrade = Double.parseDouble(semester.getDisplayAverageGrade());
+//                                semesterAverageGrade += grade;
+//                                semester.setDisplayAverageGrade(String.valueOf(semesterAverageGrade));
+//                                semesterCount[studentSemester-1]++;
+//                            }
                         }
                     }
                 }
@@ -159,20 +159,20 @@ public class ILYDAParser {
             semesters.removeAll(found);
 
             for (int i = 0; i < semesters.size(); i++) {
-                if (semesters.get(i).getGradeAverage().equals("-")) {
-                    semesters.get(i).setPassedCourses(0);
-                    continue;
-                }
-                double semesterSum = Double.parseDouble(semesters.get(i).getGradeAverage());
-                int semesterPassedCourses = semesters.get(i).getPassedCourses();
-                semesters.get(i).setGradeAverage(df2.format(semesterSum/semesterPassedCourses));
+//                if (semesters.get(i).getAverageGrade().equals("-")) {
+//                    semesters.get(i).setPassedCourses(0);
+//                    continue;
+//                }
+//                double semesterSum = Double.parseDouble(semesters.get(i).getAverageGrade());
+//                int semesterPassedCourses = semesters.get(i).getPassedCourses();
+//                semesters.get(i).setDisplayAverageGrade(df2.format(semesterSum/semesterPassedCourses));
             }
 
-            grades.setTotalEcts(String.valueOf(Math.ceil(totalEcts)).replace(".0", "").replace(",0", ""));
-            grades.setTotalAverageGrade(totalAverageGrade);
-            grades.setTotalPassedCourses(String.valueOf(count));
-            grades.setSemesters(semesters);
-            return grades;
+            progress.setDisplayEcts(String.valueOf(Math.ceil(totalEcts)).replace(".0", "").replace(",0", ""));
+            progress.setDisplayAverageGrade(totalAverageGrade);
+            progress.setDisplayPassedCourses(String.valueOf(count));
+            progress.setSemesters(semesters);
+            return progress;
         } catch (IOException e) {
             logger.error("[" + PRE_LOG + "] Error: {}", e.getMessage(), e);
             setException(e);
@@ -187,8 +187,8 @@ public class ILYDAParser {
             Semester semester = new Semester();
             ArrayList<Course> courses = new ArrayList<>();
             semester.setCourses(courses);
-            semester.setEcts("0");
-            semester.setGradeAverage("-");
+            semester.setDisplayEcts("0");
+            semester.setDisplayAverageGrade("-");
             semesters.add(semester);
         }
         return semesters;
@@ -199,17 +199,17 @@ public class ILYDAParser {
 
         try {
             Info info = parseInfoJSON(infoJSON);
-            Grades grades = parseGradesJSON(gradesJSON, totalAverageGrade);
+            Progress progress = parseGradesJSON(gradesJSON, totalAverageGrade);
 
-            if (info == null || grades == null) {
+            if (info == null || progress == null) {
                 return null;
             }
 
-            int semester = grades.getSemesters().size();
-            info.setSemester((semester == 0) ? "1" : String.valueOf(semester));
+            int semester = progress.getSemesters().size();
+            info.setCurrentSemester((semester == 0) ? "1" : String.valueOf(semester));
 
             student.setInfo(info);
-            student.setGrades(grades);
+            student.setProgress(progress);
 
             return student;
         } catch (Exception e) {

@@ -1,9 +1,9 @@
 package com.unistudents.api.web;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.unistudents.api.model.LoginForm;
+import com.unistudents.api.model.LoginRequest;
 import com.unistudents.api.service.MockService;
-import com.unistudents.api.service.ScrapeService;
+import com.unistudents.api.service.StudentService;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 public class StudentController {
 
     @Autowired
-    private ScrapeService scrapeService;
+    private StudentService studentService;
 
     @Autowired
     private MockService mockService;
@@ -47,8 +47,8 @@ public class StudentController {
     public ResponseEntity getStudent(
             @PathVariable("university") String university,
             @PathVariable(required = false) String system,
-            @RequestBody LoginForm loginForm) {
-        return scrapeService.getStudent(university.toUpperCase(), system != null ? system.toUpperCase() : null, loginForm);
+            @RequestBody LoginRequest loginRequest) {
+        return studentService.getStudent(loginRequest, university.toUpperCase(), system != null ? system.toUpperCase() : null);
     }
 
     @RequestMapping(value = {"/mock/student/{university}", "/mock/student/{university}/{system}"}, method = RequestMethod.POST)

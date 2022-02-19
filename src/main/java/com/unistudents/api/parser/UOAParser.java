@@ -29,11 +29,11 @@ public class UOAParser {
             String[] department = nameAndDepartment[1].split("-");
 
             info.setFirstName(nameAndDepartment[0]);
-            info.setDepartment("ΤΜΗΜΑ " + StringHelper.removeTones(department[1].substring(0, department[1].length() - 1).toUpperCase()));
+            info.setDepartmentTitle("ΤΜΗΜΑ " + StringHelper.removeTones(department[1].substring(0, department[1].length() - 1).toUpperCase()));
 
             String html = infoPage.toString();
             int semesterIndex = html.indexOf("Εξάμηνο Φοίτησης");
-            info.setSemester(html.substring(semesterIndex + 19, semesterIndex + 20));
+            info.setCurrentSemester(html.substring(semesterIndex + 19, semesterIndex + 20));
 
             int registrationYearIndex = html.indexOf("Ακαδημαϊκό Έτος");
             info.setRegistrationYear("ΕΤΟΣ ΕΓΓΡΑΦΗΣ " + html.substring(registrationYearIndex + 31, registrationYearIndex + 35));
@@ -47,8 +47,8 @@ public class UOAParser {
         }
     }
 
-    private Grades parseGradesPage(Document gradesPage, Document declareHistoryPage) {
-        Grades grades = new Grades();
+    private Progress parseGradesPage(Document gradesPage, Document declareHistoryPage) {
+        Progress progress = new Progress();
         DecimalFormat df2 = new DecimalFormat("#.##");
 
         double totalGradesSum = 0;
@@ -59,11 +59,11 @@ public class UOAParser {
         List<String> courses = new ArrayList<>();
         ArrayList<Semester> semesters = getDeclaredCourses(declareHistoryPage);
         if (semesters == null) {
-            grades.setTotalAverageGrade("-");
-            grades.setTotalEcts("-");
-            grades.setTotalPassedCourses("0");
-            grades.setSemesters(new ArrayList<>());
-            return grades;
+            progress.setDisplayAverageGrade("-");
+            progress.setDisplayEcts("-");
+            progress.setDisplayPassedCourses("0");
+            progress.setSemesters(new ArrayList<>());
+            return progress;
         }
 
         try {
@@ -100,8 +100,8 @@ public class UOAParser {
                         Course recognizedCourse = new Course();
                         recognizedCourse.setId(courseId);
                         recognizedCourse.setName(data[5].trim().replaceAll("\\s{2,}", " ").replace("$QT", "'"));
-                        recognizedCourse.setExamPeriod(examPeriod);
-                        recognizedCourse.setGrade("");
+//                        recognizedCourse.setExamPeriod(examPeriod);
+//                        recognizedCourse.setGrade("");
                         courses.add(courseId);
                         semesters.get(semesterId).getCourses().add(recognizedCourse);
                         totalRecognizedCourses++;
@@ -111,8 +111,8 @@ public class UOAParser {
                     boolean founded = false;
                     for (Course course : semesters.get(semesterId).getCourses()) {
                         if (course.getId().equals(courseId)) {
-                            course.setGrade(grade);
-                            course.setExamPeriod(examPeriod);
+//                            course.setGrade(grade);
+//                            course.setExamPeriod(examPeriod);
                             courses.add(courseId);
                             founded = true;
                             break;
@@ -123,8 +123,8 @@ public class UOAParser {
                         Course course = new Course();
                         course.setId(courseId);
                         course.setName(data[5].trim().replaceAll("\\s{2,}", " ").replace("$QT", "'"));
-                        course.setExamPeriod(examPeriod);
-                        course.setGrade(grade);
+//                        course.setExamPeriod(examPeriod);
+//                        course.setGrade(grade);
                         courses.add(courseId);
                         semesters.get(semesterId).getCourses().add(course);
                     }
@@ -144,7 +144,7 @@ public class UOAParser {
                 Semester semester = semesters.get(i);
                 int semesterPassedCourses = semester.getPassedCourses();
                 totalPassedCourses += semesterPassedCourses;
-                semester.setGradeAverage((semesterPassedCourses != 0) ?
+                semester.setDisplayAverageGrade((semesterPassedCourses != 0) ?
                         String.valueOf(df2.format(semesterGradesSum[i] / semesterPassedCourses)) : "-");
             }
 
@@ -155,10 +155,10 @@ public class UOAParser {
                 }
             }
 
-            grades.setSemesters(semestersToReturn);
-            grades.setTotalPassedCourses(String.valueOf(totalPassedCourses + totalRecognizedCourses));
-            grades.setTotalAverageGrade((totalPassedCourses != 0) ? df2.format(totalGradesSum / totalPassedCourses) : "-");
-            return grades;
+            progress.setSemesters(semestersToReturn);
+            progress.setDisplayPassedCourses(String.valueOf(totalPassedCourses + totalRecognizedCourses));
+            progress.setDisplayAverageGrade((totalPassedCourses != 0) ? df2.format(totalGradesSum / totalPassedCourses) : "-");
+            return progress;
         } catch (Exception e) {
             logger.error("Error: {}", e.getMessage(), e);
             setException(e);
@@ -199,8 +199,8 @@ public class UOAParser {
 
                     course.setId(courseId);
                     course.setName(name.replace("$QT", "'"));
-                    course.setGrade("-");
-                    course.setExamPeriod("-");
+//                    course.setGrade("-");
+//                    course.setExamPeriod("-");
                     courses.add(course);
                     semesters.get(Integer.parseInt(semester) - 1).getCourses().add(course);
                 }
@@ -221,7 +221,7 @@ public class UOAParser {
             semesters[i-1] = new Semester();
             semesters[i-1].setId(i);
             semesters[i-1].setPassedCourses(0);
-            semesters[i-1].setGradeAverage("-");
+            semesters[i-1].setDisplayAverageGrade("-");
             semesters[i-1].setCourses(new ArrayList<>());
         }
         return new ArrayList<>(Arrays.asList(semesters));
@@ -232,14 +232,14 @@ public class UOAParser {
 
         try {
             Info info = parseInfoPage(infoPage);
-            Grades grades = parseGradesPage(gradesPage, declareHistoryPage);
+            Progress progress = parseGradesPage(gradesPage, declareHistoryPage);
 
-            if (info == null || grades == null) {
+            if (info == null || progress == null) {
                 return null;
             }
 
             student.setInfo(info);
-            student.setGrades(grades);
+            student.setProgress(progress);
 
             return student;
         } catch (Exception e) {

@@ -32,14 +32,14 @@ public class NTUAParser {
         }
 
         student.setInfo(studentCentral.getInfo());
-        student.setGrades(mergeGrades(studentCentral.getGrades(), studentECE.getGrades()));
+        student.setProgress(mergeGrades(studentCentral.getProgress(), studentECE.getProgress()));
         return student;
     }
 
     private Student parseJSON(String json) {
         Student student = new Student();
         Info info = new Info();
-        Grades grades = initGrades();
+        Progress progress = initGrades();
         ArrayList<Semester> semesters = initSemesters();
         DecimalFormat df2 = new DecimalFormat("#.##");
 
@@ -55,7 +55,7 @@ public class NTUAParser {
             info.setAem(node.get("username").asText());
             info.setFirstName(node.get("firstname").asText());
             info.setLastName(node.get("lastname").asText());
-            info.setDepartment(node.get("department").get("name").asText());
+            info.setDepartmentTitle(node.get("department").get("name").asText());
             info.setRegistrationYear("ΕΓΓΡΑΦΗ " + node.get("studdata").get("userdata").get("dateOfEntry").asText());
 
 
@@ -107,8 +107,8 @@ public class NTUAParser {
                     }
                 }
 
-                course.setGrade(fGrade);
-                course.setExamPeriod(examPeriod + "" + courseNode.get("year").asText());
+//                course.setGrade(fGrade);
+//                course.setExamPeriod(examPeriod + "" + courseNode.get("year").asText());
 
                 int semesterIndex = Integer.parseInt(courseNode.get("semesterThatBelong").asText()) - 1;
 
@@ -122,31 +122,31 @@ public class NTUAParser {
 
                 if (!found) {
                     semesters.get(semesterIndex).getCourses().add(course);
-                    String sGrade = course.getGrade();
-                    if (!sGrade.equals("")) {
-                        if (sGrade.equals("P")) {
-                            totalPassedCoursesWithoutGrades++;
-                        } else if (!sGrade.equals("F")) {
-                            double grade = Double.parseDouble(course.getGrade());
-                            if (grade >= 5 && grade <= 10) {
-                                totalSum += grade;
-                                semesterSum[semesterIndex] += grade;
-                                semesterPassedCourses[semesterIndex]++;
-                            }
-                        }
-                    } else {
-                        boolean isException = false;
-                        for (JsonNode exceptionNode: node.get("studdata").get("exemptions")) {
-                            if (exceptionNode.get("lessonCode").asText().equals(course.getId())) {
-                                course.setGrade("");
-                                course.setExamPeriod("Απαλλαγή");
-                                isException = true;
-                                totalPassedCoursesWithoutGrades++;
-                                break;
-                            }
-                        }
-                        if (!isException) course.setGrade("-");
-                    }
+//                    String sGrade = course.getGrade();
+//                    if (!sGrade.equals("")) {
+//                        if (sGrade.equals("P")) {
+//                            totalPassedCoursesWithoutGrades++;
+//                        } else if (!sGrade.equals("F")) {
+//                            double grade = Double.parseDouble(course.getGrade());
+//                            if (grade >= 5 && grade <= 10) {
+//                                totalSum += grade;
+//                                semesterSum[semesterIndex] += grade;
+//                                semesterPassedCourses[semesterIndex]++;
+//                            }
+//                        }
+//                    } else {
+//                        boolean isException = false;
+//                        for (JsonNode exceptionNode: node.get("studdata").get("exemptions")) {
+//                            if (exceptionNode.get("lessonCode").asText().equals(course.getId())) {
+////                                course.setGrade("");
+////                                course.setExamPeriod("Απαλλαγή");
+//                                isException = true;
+//                                totalPassedCoursesWithoutGrades++;
+//                                break;
+//                            }
+//                        }
+////                        if (!isException) course.setGrade("-");
+//                    }
                 }
             }
 
@@ -156,19 +156,19 @@ public class NTUAParser {
                 int passedCourses = semesterPassedCourses[s];
                 totalPassedCourses += passedCourses;
                 semester.setPassedCourses(passedCourses);
-                semester.setGradeAverage((passedCourses == 0) ? "-" : df2.format(semesterSum[s] / passedCourses));
+                semester.setDisplayAverageGrade((passedCourses == 0) ? "-" : df2.format(semesterSum[s] / passedCourses));
                 if (semester.getCourses().size() > 0)
                     semestersToAdd.add(semester);
             }
 
-            info.setSemester(String.valueOf(semestersToAdd.size()));
-            grades.setSemesters(semestersToAdd);
-            grades.setTotalAverageGrade((totalPassedCourses == 0) ? "-" : df2.format(totalSum / totalPassedCourses));
+            info.setCurrentSemester(String.valueOf(semestersToAdd.size()));
+            progress.setSemesters(semestersToAdd);
+            progress.setDisplayAverageGrade((totalPassedCourses == 0) ? "-" : df2.format(totalSum / totalPassedCourses));
             totalPassedCourses += totalPassedCoursesWithoutGrades;
-            grades.setTotalPassedCourses(String.valueOf(totalPassedCourses));
+            progress.setDisplayPassedCourses(String.valueOf(totalPassedCourses));
 
             student.setInfo(info);
-            student.setGrades(grades);
+            student.setProgress(progress);
             return student;
         } catch (Exception e) {
             logger.error("[NTUA] Error: {}", e.getMessage(), e);
@@ -178,8 +178,8 @@ public class NTUAParser {
         }
     }
 
-    private Grades mergeGrades(Grades centralGrades, Grades eceGrades) {
-        Grades grades = initGrades();
+    private Progress mergeGrades(Progress centralProgress, Progress eceProgress) {
+        Progress progress = initGrades();
         ArrayList<Semester> semesters = initSemesters();
         DecimalFormat df2 = new DecimalFormat("#.##");
 
@@ -191,11 +191,11 @@ public class NTUAParser {
         int eIndex = 0;
         Semester centralSemester;
         Semester eceSemester;
-        while (cIndex < centralGrades.getSemesters().size() &&
-               eIndex < eceGrades.getSemesters().size()) {
+        while (cIndex < centralProgress.getSemesters().size() &&
+               eIndex < eceProgress.getSemesters().size()) {
 
-            centralSemester = centralGrades.getSemesters().get(cIndex);
-            eceSemester = eceGrades.getSemesters().get(eIndex);
+            centralSemester = centralProgress.getSemesters().get(cIndex);
+            eceSemester = eceProgress.getSemesters().get(eIndex);
 
             if (centralSemester.getId() == eceSemester.getId()) {
                 double sum = 0;
@@ -209,24 +209,24 @@ public class NTUAParser {
 
                         if (cCourse.getId().equals(eCourse.getId())) {
 
-                            String grade = eCourse.getGrade();
-                            if (grade.trim().equals("-") || eCourse.getExamPeriod() == null)
-                                break;
+//                            String grade = eCourse.getGrade();
+//                            if (grade.trim().equals("-") || eCourse.getExamPeriod() == null)
+//                                break;
 
-                            if (grade.trim().equals("P")) {
-                                totalPassedCoursesWithoutGrades++;
-                            } else if (!grade.trim().equals("F") && !grade.trim().contains("-")) {
-                                double courseGradeDouble = Double.parseDouble(grade);
-                                if (courseGradeDouble >= 5 && courseGradeDouble <= 10) {
-                                    sum += courseGradeDouble;
-                                    totalSum += courseGradeDouble;
-                                    passedCourses++;
-                                    totalPassedCourses++;
-                                }
-                            }
+//                            if (grade.trim().equals("P")) {
+//                                totalPassedCoursesWithoutGrades++;
+//                            } else if (!grade.trim().equals("F") && !grade.trim().contains("-")) {
+//                                double courseGradeDouble = Double.parseDouble(grade);
+//                                if (courseGradeDouble >= 5 && courseGradeDouble <= 10) {
+//                                    sum += courseGradeDouble;
+//                                    totalSum += courseGradeDouble;
+//                                    passedCourses++;
+//                                    totalPassedCourses++;
+//                                }
+//                            }
 
-                            cCourse.setGrade(grade);
-                            cCourse.setExamPeriod(eCourse.getExamPeriod());
+//                            cCourse.setGrade(grade);
+//                            cCourse.setExamPeriod(eCourse.getExamPeriod());
                             semester.getCourses().add(cCourse);
 
                             found = true;
@@ -237,23 +237,23 @@ public class NTUAParser {
                     if (!found) {
                         semester.getCourses().add(cCourse);
 
-                        String grade = cCourse.getGrade();
-                        if (grade.equals("P") || grade.trim().equals("")) {
-                            totalPassedCoursesWithoutGrades++;
-                        } else if (!grade.equals("F") && !grade.equals("-")) {
-                            double courseGradeDouble = Double.parseDouble(grade);
-                            if (courseGradeDouble >= 5 && courseGradeDouble <= 10) {
-                                sum += courseGradeDouble;
-                                totalSum += courseGradeDouble;
-                                passedCourses++;
-                                totalPassedCourses++;
-                            }
-                        }
+//                        String grade = cCourse.getGrade();
+//                        if (grade.equals("P") || grade.trim().equals("")) {
+//                            totalPassedCoursesWithoutGrades++;
+//                        } else if (!grade.equals("F") && !grade.equals("-")) {
+//                            double courseGradeDouble = Double.parseDouble(grade);
+//                            if (courseGradeDouble >= 5 && courseGradeDouble <= 10) {
+//                                sum += courseGradeDouble;
+//                                totalSum += courseGradeDouble;
+//                                passedCourses++;
+//                                totalPassedCourses++;
+//                            }
+//                        }
                     }
                 }
 
                 semester.setPassedCourses(passedCourses);
-                semester.setGradeAverage((passedCourses == 0) ? "-" : df2.format(sum / passedCourses));
+                semester.setDisplayAverageGrade((passedCourses == 0) ? "-" : df2.format(sum / passedCourses));
                 semesters.set(centralSemester.getId() - 1, semester);
 
                 cIndex++;
@@ -262,16 +262,16 @@ public class NTUAParser {
                 semesters.set(centralSemester.getId() - 1, centralSemester);
 
                 for (Course course: centralSemester.getCourses()) {
-                    String courseGrade = course.getGrade();
-                    if (courseGrade.equals("P") || courseGrade.trim().equals("")) {
-                        totalPassedCoursesWithoutGrades++;
-                    } else if (!courseGrade.equals("F") && !courseGrade.equals("-")) {
-                        double courseGradeDouble = Double.parseDouble(courseGrade);
-                        if (courseGradeDouble >= 5 && courseGradeDouble <= 10) {
-                            totalSum += courseGradeDouble;
-                            totalPassedCourses++;
-                        }
-                    }
+//                    String courseGrade = course.getGrade();
+//                    if (courseGrade.equals("P") || courseGrade.trim().equals("")) {
+//                        totalPassedCoursesWithoutGrades++;
+//                    } else if (!courseGrade.equals("F") && !courseGrade.equals("-")) {
+//                        double courseGradeDouble = Double.parseDouble(courseGrade);
+//                        if (courseGradeDouble >= 5 && courseGradeDouble <= 10) {
+//                            totalSum += courseGradeDouble;
+//                            totalPassedCourses++;
+//                        }
+//                    }
                 }
 
                 cIndex++;
@@ -280,21 +280,21 @@ public class NTUAParser {
             }
         }
 
-        for (int s = cIndex; s < centralGrades.getSemesters().size(); s++) {
-            centralSemester = centralGrades.getSemesters().get(s);
+        for (int s = cIndex; s < centralProgress.getSemesters().size(); s++) {
+            centralSemester = centralProgress.getSemesters().get(s);
             semesters.set(centralSemester.getId() - 1, centralSemester);
 
             for (Course course: centralSemester.getCourses()) {
-                String courseGrade = course.getGrade();
-                if (courseGrade.equals("P") || courseGrade.trim().equals("")) {
-                    totalPassedCoursesWithoutGrades++;
-                } else if (!courseGrade.equals("F") && !courseGrade.equals("-")) {
-                    double courseGradeDouble = Double.parseDouble(courseGrade);
-                    if (courseGradeDouble >= 5 && courseGradeDouble <= 10) {
-                        totalSum += courseGradeDouble;
-                        totalPassedCourses++;
-                    }
-                }
+//                String courseGrade = course.getGrade();
+//                if (courseGrade.equals("P") || courseGrade.trim().equals("")) {
+//                    totalPassedCoursesWithoutGrades++;
+//                } else if (!courseGrade.equals("F") && !courseGrade.equals("-")) {
+//                    double courseGradeDouble = Double.parseDouble(courseGrade);
+//                    if (courseGradeDouble >= 5 && courseGradeDouble <= 10) {
+//                        totalSum += courseGradeDouble;
+//                        totalPassedCourses++;
+//                    }
+//                }
             }
         }
 
@@ -304,19 +304,19 @@ public class NTUAParser {
                 semestersToAdd.add(semester);
         }
 
-        grades.setSemesters(semestersToAdd);
-        grades.setTotalPassedCourses(String.valueOf(totalPassedCourses + totalPassedCoursesWithoutGrades));
-        grades.setTotalAverageGrade((totalPassedCourses == 0) ? "-" : df2.format(totalSum / totalPassedCourses));
-        return grades;
+        progress.setSemesters(semestersToAdd);
+        progress.setDisplayPassedCourses(String.valueOf(totalPassedCourses + totalPassedCoursesWithoutGrades));
+        progress.setDisplayAverageGrade((totalPassedCourses == 0) ? "-" : df2.format(totalSum / totalPassedCourses));
+        return progress;
     }
 
-    private Grades initGrades() {
-        Grades grades = new Grades();
-        grades.setTotalAverageGrade("-");
-        grades.setTotalEcts("-");
-        grades.setTotalPassedCourses("0");
-        grades.setSemesters(new ArrayList<>());
-        return grades;
+    private Progress initGrades() {
+        Progress progress = new Progress();
+        progress.setDisplayAverageGrade("-");
+        progress.setDisplayEcts("-");
+        progress.setDisplayPassedCourses("0");
+        progress.setSemesters(new ArrayList<>());
+        return progress;
     }
 
     private ArrayList<Semester> initSemesters() {
@@ -325,7 +325,7 @@ public class NTUAParser {
             semesters[i-1] = new Semester();
             semesters[i-1].setId(i);
             semesters[i-1].setPassedCourses(0);
-            semesters[i-1].setGradeAverage("-");
+            semesters[i-1].setDisplayAverageGrade("-");
             semesters[i-1].setCourses(new ArrayList<>());
         }
         return new ArrayList<>(Arrays.asList(semesters));

@@ -5,11 +5,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Map;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Student {
-    private Info info;
-    private Progress progress;
+public class LoginRequest {
+    private String username;
+    private String password;
+    private Map<String, String> session;
 }
