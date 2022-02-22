@@ -178,13 +178,14 @@ public class StudentService {
     public ResponseEntity<?> getStudent(LoginRequest loginRequest, String university, String system) {
 
         Integration integration = Integration.getIntegration(university, system);
+        if (integration == null) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
         Scraper scraper = scrapers.stream()
                 .filter(s -> s.getIntegrations().contains(integration))
                 .findFirst()
                 .orElse(null);
 
-        if (scraper == null) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        if (scraper == null) return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 
         Map<String, Object> scrapedData = scraper.getScrapedData(loginRequest, integration);
 

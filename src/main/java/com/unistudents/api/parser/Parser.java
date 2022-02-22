@@ -21,11 +21,11 @@ public abstract class Parser {
         return new Services().uploadLogFile(exception, document, PRE_LOG);
     }
 
-    public void setException(Exception exception) {
+    void setException(Exception exception) {
         this.exception = exception;
     }
 
-    public void setDocument(String document) {
+    void setDocument(String document) {
         this.document = document;
     }
 
