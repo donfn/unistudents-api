@@ -2,6 +2,7 @@ package com.unistudents.api.scraper;
 
 import com.unistudents.api.common.Integration;
 import com.unistudents.api.common.Services;
+import com.unistudents.api.common.StringHelper;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 import org.jsoup.Connection;
@@ -157,6 +158,7 @@ public class CardisoftScraper extends Scraper {
 
         // set student info page
         scrapedData.put(Docs.INFO_PAGE.toString(), returnedDoc);
+        // StringHelper.write("src/test/resources/cardisoft/info.html", returnedDoc.outerHtml());
 
         // add cookies
         for (Map.Entry<String, String> entry : response.cookies().entrySet()) {
@@ -181,6 +183,7 @@ public class CardisoftScraper extends Scraper {
                     .cookies(cookies)
                     .method(Connection.Method.GET)
                     .execute();
+            returnedDoc = response.parse();
         } catch (SocketTimeoutException | UnknownHostException | HttpStatusException | ConnectException connException) {
             connected = false;
             logger.warn("[" + PRE_LOG + "] Warning: {}", connException.getMessage(), connException);
@@ -191,14 +194,10 @@ public class CardisoftScraper extends Scraper {
         }
 
         // set grades page
-        try {
-            scrapedData.put(Docs.GRADES_PAGE.toString(), response.parse());
-            setSession(cookies);
-            return scrapedData;
-        } catch (IOException e) {
-            logger.error("[" + PRE_LOG + "] Error: {}", e.getMessage(), e);
-            return null;
-        }
+        scrapedData.put(Docs.GRADES_PAGE.toString(), returnedDoc);
+        // StringHelper.write("src/test/resources/cardisoft/grades.html", returnedDoc.outerHtml());
+        setSession(cookies);
+        return scrapedData;
     }
 
     @Override

@@ -1,0 +1,1104 @@
+<html>
+ <head> 
+  <meta NAME="GENERATOR" Content="Microsoft Visual Studio 6.0"> 
+  <meta http-equiv="Content-Type" content="text/html; charset=windows-1253"> 
+  <meta http-equiv="Content-Language" content="el"> 
+  <link rel="stylesheet" type="text/css" href="unistudent.css"> 
+  <title>UNIVERSITY STUDENTS SYSTEM</title> 
+  <script type="text/javascript" src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha384-rY/jv8mMhqDabXSo+UCggqKtdmBfd3qC2/KvyTDNQ6PcUJXaxK1tMepoQda4g5vB" crossorigin="anonymous"></script> 
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js" integrity="sha384-yIqa4x9Cpx9ZK4TKjprtQfMzhBQaotZRqdvNR6Y0Ozb+/2TaeBTqxr9ko1tQhSgU" crossorigin="anonymous"></script> 
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular-messages.min.js" integrity="sha384-Whow1AP9yk/ncZXeszCVRcuw25o+1dys5YTJ6Fgik5SyciRZZeoqs06xP2rzXtPO" crossorigin="anonymous"></script> 
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular-animate.min.js" integrity="sha384-kN5JkHYVPirSqYGT8T8yiWjSk7dQbwE7Ri8B1e6mTaESqPk0ZzezoykQuUGixa2X" crossorigin="anonymous"></script> 
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular-aria.min.js" integrity="sha384-v9WdzVGR+rwdUVZhBdPNBQa55DL0m/SZZOhsvm42Rh/G+8y4dzb8ptTJws5d/vY1" crossorigin="anonymous"></script> 
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ngStorage/0.3.11/ngStorage.min.js" integrity="sha384-f6S49lisxpydi1pZg4rpv6aIrhPhDHoLyKUpeuOL9F5zmJVeWqUYfr1+s/yAMVvz" crossorigin="anonymous"></script> 
+  <script type="text/javascript" src="app.js"></script> 
+  <style type="text/css">
+   input.ng-invalid.ng-touched, textarea.ng-invalid.ng-touched {
+    border:solid 1px #cd5c5c !important;
+  }
+
+    .ng-field .ng-error-messages {
+        padding-top: 4px;
+        color:#cd5c5c !important;
+        font-weight: normal !important;
+    }
+ 
+  form.ng-invalid input[type=submit],  form.ng-invalid input[type=button] {
+      border:solid 1px #ccc;
+    background-color: #ddd;
+    color:#aaa;
+}
+</style> 
+  <script type="text/javascript">(function(window) { if (typeof window === 'undefined') { return; }window.FormValidations = [{'name':'sortBy','required':false,'maxlength':0,'message':'','pattern':'/^([a-z0-9]{0,24})$/'},]; })(window);</script> 
+  <script type="text/javascript">
+    angular.element(function () {
+        
+        var form_bootstrap = function form_bootstrap(window) {
+            if (typeof window === 'undefined') {  return; }
+            if (typeof window.FormValidations === 'undefined') { return; }
+            $('form').attr('ng-controller','FormController as ctrl');
+            $('form').find('input[type=submit]').attr('ng-disabled', $('form').attr('name') + '.$invalid');
+            $('form').find('input[type=button]').attr('ng-disabled', $('form').attr('name') + '.$invalid');
+            if (typeof $('form').attr('name') === 'undefined') {
+                $('form').attr('name', 'form');
+            }
+            var formName = $('form').attr('name');
+            for (var i = 0; i < window.FormValidations.length; i++) {
+                var validation = window.FormValidations[i];
+                var $selector = $(':text[name=' + validation.name + ']');
+                if ($selector.length == 0)
+                    $selector = $('input[type=\'password\'][name=\'' + validation.name + '\']');
+                if ($selector.length == 0)
+                    $selector = $('textarea[name=' + validation.name + ']');
+                if ($selector.length > 0) {
+                    var messagePattern = validation.message || 'Η τιμή περιέχει μη έγκυρους χαρακτήρες ή ξεπερνά το επιτρεπόμενο μέγεθος';
+                    //wrap element
+                    $selector.wrap('<span class="ng-field"></span>');
+                    $selector.attr('ng-trim', 'false').attr('ng-model', validation.name).attr('ng-pattern', validation.pattern + 'i');
+                    var $container = $selector.closest('.ng-field');
+                    $container.append('<div ng-if="' + formName + '.' + validation.name + '.$touched" ng-messages="' +formName + '.' + validation.name + '.$error" class="ng-error-messages" role="alert"></div>')
+                    if (validation.pattern) {
+                            $container.find('.ng-error-messages').append('<div ng-show="' + formName + '.' + validation.name + '.$error.pattern" ng-message="maxlength">' + messagePattern + '</div>')
+                    }
+                    if (validation.maxlength > 0) {
+                        $selector.attr('maxlength', validation.maxlength);
+                        $selector.attr('ng-maxlength', validation.maxlength);
+                        $container.find('.ng-error-messages').append('<div ng-show="' + formName + '.' + validation.name + '.$error.maxlength" ng-message="maxlength">Η τιμή ξεπερνά το επιτρεπόμενο όριο χαρακτήρων (' + validation.maxlength + ' χαρακτήρες)</div>')
+                    }
+                    if (validation.required) {
+                        $selector.attr('ng-required', 'true');
+                        $container.find('.ng-error-messages').append('<div ng-show="' + formName + '.' + validation.name + '.$error.required" ng-message="required">Το πεδίο είναι υποχρεωτικό</div>')
+                    }
+                }
+    }
+        };
+        form_bootstrap(window);
+        angular.bootstrap(document, ['students']);
+    });
+
+</script> 
+ </head> 
+ <body style="margin-top:0;margin-left:0;margin-bottom:0;margin-right:0;height:100%" onunload="javascript:return window_onunload()"> 
+  <script language="javascript">
+	<!--
+	if (navigator.userAgent.indexOf("Gecko")!=-1)
+	{
+	//Add Event Listeners
+	document.addEventListener('click', function (e) {window.event=e;window.event.srcElement=e.target}, true); 
+	document.addEventListener('mouseover', function (e) {window.event=e;window.event.srcElement=e.target}, true); 
+	document.addEventListener('onmouseout', function (e) {window.event=e;window.event.srcElement=e.target}, true); 
+	document.addEventListener('onresize', function (e) {window.event=e;window.event.srcElement=e.target}, true); 
+	}
+
+
+	function window_onunload() {
+
+	if (window.event.clientX <0 && window.event.clientY <0)
+	 {
+	   //location.href="disconnect.asp"
+	 }
+	}
+	//-->
+</script> 
+  <script>
+
+function showCal(result,date)
+{
+	// αν το παράθυρο είναι ήδη ανοιχτό δεν το ξανανοίγει, αλλά το φέρνει μπροστά.
+	popWindow=window.open('calendar.asp?frm=yes&result=' + result + '&date=' + date,'wnd1','buttonbar=yes,width=200,height=240 top=250 left=300 resizable=no')
+	if (popWindow.opener == null) popWindow.opener = winParent;
+	popWindow.focus();
+	return popWindow;
+}
+function showCalendar(result,date)
+{
+	window.event.srcElement.parentElement.children(0).id=window.event.srcElement.parentElement.children(0).sourceIndex 
+	result=window.event.srcElement.parentElement.children(0).id
+	ddate=window.event.srcElement.parentElement.children(0).value
+	popWindow=window.open('calendar.asp?date=' + ddate + '&result=' + result,'wnd1','buttonbar=yes,maximize=no,width=200,height=260 top=250 left=250 resizable=no')
+		if (popWindow.opener == null) popWindow.opener = winParent
+			if (window.focus) setTimeout('popWindow.focus()',100);
+
+	
+}
+
+
+function Navigate(step)
+{
+// Γίνεται navigate από τη μία σελίδα στην άλλη. Πρέπει σε κάθε σελίδα που καλείται να υπάρχουν
+// δύο hidden πεδία για το total και το currentpage
+//
+//<input type="hidden" name="total" id="total" value="totPages">
+//<input type="hidden" name="currentPage" id="currentPage" value="1">
+
+
+	var intcurrentPage ;
+    var intTotal;// το σύνολο των σελίδων
+    currentPage.value = parseInt(currentPage.value) + step;
+    intcurrentPage = parseInt(currentPage.value);
+    intTotal = parseInt(total.value);
+	            
+      if (step==1)
+		{
+			tablemain.nextPage();
+			if (intcurrentPage>=intTotal)
+			{
+			intcurrentPage=intTotal
+			currentPage.value=intTotal
+			}
+		}
+	   else
+	   {
+	 	tablemain.previousPage();
+	 	if (intcurrentPage<=1)
+			{
+				intcurrentPage=1
+				currentPage.value=1
+
+			}
+	   }
+	 pagenum.innerHTML =' Σελίδα ' + intcurrentPage + ' από ' + intTotal +' ';
+
+}
+
+
+function MM_swapImage() { //v3.0
+  var i,j=0,x,a=MM_swapImage.arguments; document.MM_sr=new Array; for(i=0;i<(a.length-2);i+=3)
+   if ((x=MM_findObj(a[i]))!=null){document.MM_sr[j++]=x; if(!x.oSrc) x.oSrc=x.src; x.src=a[i+2];}
+}
+
+function MM_swapImgRestore() { //v3.0
+  var i,x,a=document.MM_sr; for(i=0;a&&i<a.length&&(x=a[i])&&x.oSrc;i++) x.src=x.oSrc;
+}
+function MM_findObj(n, d) { //v3.0
+  var p,i,x;  
+  if(!d) d=document; 
+  if((p=n.indexOf("?"))>0&&parent.frames.length) 
+  {
+   d=parent.frames[n.substring(p+1)].document; 
+   n=n.substring(0,p);
+  }
+  if(!(x=d[n])&&d.all) 
+  x=d.all[n]; 
+  for (i=0;!x&&i<d.forms.login.length;i++) 
+  x=d.forms[i][n];
+  for(i=0;!x&&d.layers&&i<d.layers.length;i++) 
+  x=MM_findObj(n,d.layers[i].document); 
+  return x;
+}
+
+	
+	function mnuOnClick(id,link,imageoff,imageon,extraParam)
+	{
+//		alert(id)
+//		alert(link)
+		if (link!="") 
+		{
+		// έλεγχος για το αν υπάρχει ήδη το '?'
+			var s = link.indexOf("?");
+			if (s!=-1)
+				link=link+"&mnuid="+id+ "&" + extraParam
+			else
+				link=	link+"?mnuid="+id+ "&" + extraParam
+		window.open (link,"_self")	
+		}
+		var tableChildren
+		var table=document.getElementById("menuTable")
+		tableChildren=table.childNodes[0].childNodes.length
+		var i;
+		for (i=0;i<tableChildren;i++)
+		{
+			
+			if (table.childNodes[0].childNodes[i].childNodes[0].innerHTML!="&nbsp;")
+			{
+				if (table.childNodes[0].childNodes[i].childNodes[0].id!=id)
+					{
+						if (table.childNodes[0].childNodes[i].childNodes[0].childNodes.length!=1)
+							{
+								table.childNodes[0].childNodes[i].childNodes[0].childNodes[1].style.display="none"
+								table.childNodes[0].childNodes[i].childNodes[0].style.backgroundImage="url("+document.getElementById('imageLevel0Sub').value+")"
+							}
+						else
+							{	
+			
+								table.childNodes[0].childNodes[i].childNodes[0].style.backgroundImage="url(" +document.getElementById('imageLevel0').value+ ")"
+							}
+					}
+				else
+				  {
+				  
+				  	if (table.childNodes[0].childNodes[i].childNodes[0].childNodes.length!=1)
+						{
+							table.childNodes[0].childNodes[i].childNodes[0].childNodes[1].style.display=""
+							table.childNodes[0].childNodes[i].childNodes[0].style.backgroundImage="url(\'"+document.getElementById('imageLevel0SubSel').value+"')"
+						 }
+					else
+					{
+						table.childNodes[0].childNodes[i].childNodes[0].style.backgroundImage="url(\'"+ document.getElementById('imageLevel0Sel').value+"')"
+					}
+					
+				  }
+			}
+		}
+	
+	}
+
+
+	function getInnerText (node) {
+	if (typeof node.textContent != 'undefined') {
+	return node.textContent;
+	}
+	else if (typeof node.innerText != 'undefined') {
+	return node.innerText;
+	}
+	else if (typeof node.text != 'undefined') {
+	return node.text;
+	}
+	else {
+	switch (node.nodeType) {
+	case 3:
+	case 4:
+	return node.nodeValue;
+	break;
+	case 1:
+	case 11:
+	var innerText = '';
+	for (var i = 0; i < node.childNodes.length; i++) {
+	innerText += getInnerText(node.childNodes[i]);
+	}
+	return innerText;
+	break;
+	default:
+	return '';
+	}
+	}
+}
+
+function underline(type,color)
+{
+	var el;
+	el=window.event.srcElement
+	if (type=='1')
+	{
+		el.style.color=color;
+		el.style.textDecorationUnderline="underline"
+	}
+	else
+	{
+		el.style.color="";
+		el.style.fontWeight=""
+		el.style.textDecorationUnderline=""
+	}
+}
+
+function CollapseStClass(type)
+{
+	var tblMain ;
+	var tblRow ;
+	var mainRow;
+	tblMain = document.getElementById("mainTable");
+	// got through rows
+	//tblRow=tblMain.childNodes[0];
+	tblRow=tblMain;
+	for (i=3; i < tblRow.rows.length;i++)
+	{
+		
+		if (type=="1")
+			{
+			tblRow.rows[i].cells[0].childNodes[0].childNodes[2].style.display=""
+			tblRow.rows[i].cells[0].childNodes[0].childNodes[0].childNodes[0].src="images/minus.gif"
+			}
+		else
+			{
+			tblRow.rows[i].cells[0].childNodes[0].childNodes[2].style.display="none"
+			tblRow.rows[i].cells[0].childNodes[0].childNodes[0].childNodes[0].src="images/plus.gif"
+			}
+	}	
+}
+function CollapseStResults(type)
+{
+	var tblMain ;
+	var tblRow ;
+	var mainRow;
+	tblMain = document.getElementById("mainTable");
+	// got through rows
+	
+	//tblRow=tblMain.children(0);
+	tblRow=tblMain
+	
+	for (i=2; i < tblRow.rows.length-1;i++)
+	{
+		if (type=="1")
+			{
+			tblRow.rows[i].cells[0].childNodes[0].childNodes[4].style.display=""
+			tblRow.rows[i].cells[0].childNodes[0].childNodes[0].childNodes[0].src="images/minus.gif"
+			}
+		else
+			{
+	
+			tblRow.rows[i].cells[0].childNodes[0].childNodes[4].style.display="none"
+			tblRow.rows[i].cells[0].childNodes[0].childNodes[0].childNodes[0].src="images/plus.gif"
+			}
+	}	
+}
+
+function CollapseSch(type)
+{
+	var tblMain ;
+	var tblRow ;
+	var mainRow;
+	tblMain = document.getElementById("mainTable");
+	// got through rows
+	tblRow=tblMain.children(0);
+	for (i=1; i < tblRow.rows.length;i++)
+	{
+		if (type=="1")
+			{
+		//	tblRow.rows(i).cells(0).children(0).children(2).style.display=""
+		//	tblRow.rows(i).cells(0).children(0).children(0).children(0).src="images/minus.gif"
+			if(tblRow.rows(i).cells(0).children.length>0)
+			{
+				tblRow.rows(i).cells(0).children(0).children(2).style.display=""
+				tblRow.rows(i).cells(0).children(0).children(0).children(0).src="images/minus.gif"
+			}
+			}
+		else
+			{
+			if(tblRow.rows(i).cells(0).children.length>0)
+			{
+				tblRow.rows(i).cells(0).children(0).children(2).style.display="none"
+				tblRow.rows(i).cells(0).children(0).children(0).children(0).src="images/plus.gif"
+			}
+			}
+	}	
+}
+
+function startClock(el) {
+    window.setInterval("Clock_Tick()", 1000);
+    Clock_Tick();
+}
+
+
+function Clock_Tick(el)
+{
+	
+	var ratio = 4;
+    var s = Date();
+    var t = s.substring(11,19);
+    document.all.clock.innerHTML = t;
+ //   document.all.el.style.fontSize = doc_height;
+}
+
+function changeLang(lang)
+{
+	var sref=location.href;
+	var newloc
+	var hrefParts = sref.split('?');
+	if (hrefParts.length==1)
+		location.href=sref + "?lang=" + lang
+	else
+	{
+		newloc=hrefParts[0] + '?lang=' + lang;
+		var query=hrefParts[1];
+		var valuePairs = query.split('&');
+		for (i=0;i<valuePairs.length;i++) 
+		{
+		// get values from querystring
+		var tempPair = valuePairs[i].split('=');
+		var skey = tempPair[0];
+		var svalue = tempPair[1];
+		if (skey!='lang' && skey!='')
+		newloc=newloc + '&' + skey + '=' + svalue
+		}
+		location.href=newloc;
+	}
+}
+
+</script> 
+  <table width="100%" align="center" border="0" cellspacing="0" cellpadding="0" style="margin-top:0"> 
+   <tbody>
+    <tr height="64" valign="top"> 
+     <td valign="top" rowspan="7" width="142" class="mainheader"> <img style="" alt="eLOGO" src="images/unipi.gif"> 
+      <div style="width:135;margin-top:55;margin-left:5"> 
+       <input type="hidden" id="imageLevel0" value="images/flevel0.gif">
+       <input type="hidden" id="imageLevel0Sel" value="images/flevel0Sel.gif">
+       <input type="hidden" id="imageLevel0Sub" value="images/flevel0Sub.gif">
+       <input type="hidden" id="imageLevel0SubSel" value="images/flevel0SubSel.gif">
+       <input type="hidden" id="imageLevel1Sel" value="images/level1Sel.gif" <input> 
+       <table class="menuTable" cellpadding="2" id="menuTable" style="FILTER:Shadow(color=#C0c0c0)">
+        <tbody>
+         <tr height="22">
+          <td id="mnuMain" width="127" class="menuItem" style="background-repeat:no-repeat;cursor:pointer" background="images/flevel0.gif" onclick="mnuOnClick('mnuMain','main.asp','images/flevel0.gif','images/flevel0Sel.gif','')">&nbsp;Αρχική</td>
+         </tr>
+         <tr height="22">
+          <td id="student" width="127" class="menuItem" style="background-repeat:no-repeat;cursor:pointer" background="images/flevel0.gif" onclick="mnuOnClick('student','studentMain.asp','images/flevel0.gif','images/flevel0Sel.gif','')">&nbsp;Στοιχεία Φοιτητή</td>
+         </tr>
+         <tr height="22">
+          <td id="mnu3" width="127" class="menuItem" style="background-repeat:no-repeat;cursor:pointer" background="images/flevel0.gif" onclick="mnuOnClick('mnu3','stud_CResults.asp?studPg=1','images/flevel0.gif','images/flevel0Sel.gif','')">&nbsp;Βαθμολογίες</td>
+         </tr>
+         <tr height="22">
+          <td id="diloseis" width="127" class="menuItem" style="background-repeat:no-repeat;cursor:pointer" background="images/flevel0Sub.gif" onclick="mnuOnClick('diloseis','','images/flevel0Sub.gif','images/flevel0SubSel.gif','')">&nbsp;Δηλώσεις
+           <div style="margin-top:10;margin-left:0;display:none">
+            <table cellpadding="3" cellspacing="0" width="100%">
+             <tbody>
+              <tr>
+               <td valign="top"><img src="images/level1_regular.gif"></td>
+               <td valign="top" style="cursor:pointer;valign:middle;background-repeat:no-repeat" id="newDil" width="125" height="18" class="menuUnderline" onclick="window.open('stud_NewClass.asp?studPg=1&amp;mnuid=diloseis;newDil&amp;','_self')">Η δήλωσή μου</td>
+              </tr>
+             </tbody>
+            </table>
+            <table cellpadding="3" cellspacing="0" width="100%">
+             <tbody>
+              <tr>
+               <td valign="top"><img src="images/level1_regular.gif"></td>
+               <td valign="top" style="cursor:pointer;valign:middle;background-repeat:no-repeat" id="showDil" width="125" height="18" class="menuUnderline" onclick="window.open('stud_vClasses.asp?studPg=1&amp;mnuid=diloseis;showDil&amp;','_self')">Προβολή</td>
+              </tr>
+             </tbody>
+            </table>
+           </div></td>
+         </tr>
+         <tr height="22">
+          <td id="program" width="127" class="menuItem" style="background-repeat:no-repeat;cursor:pointer" background="images/flevel0Sub.gif" onclick="mnuOnClick('program','','images/flevel0Sub.gif','images/flevel0SubSel.gif','')">&nbsp;Πρόγραμμα
+           <div style="margin-top:10;margin-left:0;display:none">
+            <table cellpadding="3" cellspacing="0" width="100%">
+             <tbody>
+              <tr>
+               <td valign="top"><img src="images/level1_regular.gif"></td>
+               <td valign="top" style="cursor:pointer;valign:middle;background-repeat:no-repeat" id="submnu1" width="125" height="18" class="menuUnderline" onclick="window.open('getProgramCourses.asp?orID=-1&amp;studPg=1&amp;mnuid=program;submnu1&amp;','_self')">Σπουδών</td>
+              </tr>
+             </tbody>
+            </table>
+            <table cellpadding="3" cellspacing="0" width="100%">
+             <tbody>
+              <tr>
+               <td valign="top"><img src="images/level1_regular.gif"></td>
+               <td valign="top" style="valign:middle;cursor:;background-repeat:no-repeat" id="submnu4" width="125" height="18" class="menuDisabled"><img src="images/level1_regular.gif">Διδασκαλίας</td>
+              </tr>
+             </tbody>
+            </table>
+            <table cellpadding="3" cellspacing="0" width="100%">
+             <tbody>
+              <tr>
+               <td valign="top"><img src="images/level1_regular.gif"></td>
+               <td valign="top" style="valign:middle;cursor:;background-repeat:no-repeat" id="submnu5" width="125" height="18" class="menuDisabled"><img src="images/level1_regular.gif">Εξετάσεων</td>
+              </tr>
+             </tbody>
+            </table>
+           </div></td>
+         </tr>
+         <tr height="22">
+          <td id="scholar" width="127" class="menuItem" style="background-repeat:no-repeat;cursor:pointer;" background="images/flevel0.gif" onclick="mnuOnClick('scholar','stud_scholarships.asp?studPg=1','images/flevel0.gif','images/flevel0Sel.gif','')">&nbsp;Φοιτητική Μέριμνα</td>
+         </tr>
+         <tr height="22">
+          <td id="forms" width="127" class="menuItem" style="background-repeat:no-repeat;cursor:pointer" background="images/flevel0Sub.gif" onclick="mnuOnClick('forms','','images/flevel0Sub.gif','images/flevel0SubSel.gif','')">&nbsp;Αιτήσεις
+           <div style="margin-top:10;margin-left:0;display:none">
+            <table cellpadding="3" cellspacing="0" width="100%">
+             <tbody>
+              <tr>
+               <td valign="top"><img src="images/level1_regular.gif"></td>
+               <td valign="top" style="cursor:pointer;valign:middle;background-repeat:no-repeat" id="newForm" width="125" height="18" class="menuUnderline" onclick="window.open('sendforms.asp?studPg=1&amp;mnuid=forms;newForm&amp;','_self')">Νέα αίτηση</td>
+              </tr>
+             </tbody>
+            </table>
+            <table cellpadding="3" cellspacing="0" width="100%">
+             <tbody>
+              <tr>
+               <td valign="top"><img src="images/level1_regular.gif"></td>
+               <td valign="top" style="cursor:pointer;valign:middle;background-repeat:no-repeat" id="sForm" width="125" height="18" class="menuUnderline" onclick="window.open('stud_reqStatus.asp?studPg=1&amp;mnuid=forms;sForm&amp;','_self')">Κατάσταση αιτήσεων</td>
+              </tr>
+             </tbody>
+            </table>
+           </div></td>
+         </tr>
+         <tr height="22">
+          <td id="mnu7" width="127" class="menuItem" style="background-repeat:no-repeat;cursor:pointer" background="images/flevel0.gif" onclick="mnuOnClick('mnu7','disconnect.asp','images/flevel0.gif','images/flevel0Sel.gif','')">&nbsp;Αποσύνδεση</td>
+         </tr>
+         <tr>
+          <td>&nbsp;</td>
+         </tr>
+        </tbody>
+       </table> 
+      </div> </td> 
+     <td class="mainheader" width="1px">&nbsp;</td> 
+     <td class="mainheader" valign="top"></td> 
+     <td class="mainheader" valign="middle"> <span class="tableheader">ΠΑΝΕΠΙΣΤΗΜΙΟ ΠΕΙΡΑΙΩΣ <br>www.unipi.gr<br>Υπηρεσία Πληροφόρησης Φοιτητών</span> </td> 
+     <td nowrap width="50px" class="mainHeader"> 
+      <div style="margin-top:5px"> 
+       <img src="images/gr.gif" onclick="changeLang('el-gr')" style="cursor:pointer" title="Ελληνικά" WIDTH="21" HEIGHT="19"> 
+       <img src="images/en.gif" onclick="changeLang('en-us')" style="cursor:pointer" title="English" WIDTH="21" HEIGHT="19"> 
+      </div> </td> 
+    </tr> 
+    <tr class="mainHeader">
+     <td colspan="4">&nbsp;</td>
+    </tr> 
+    <tr class="mainHeader" height="4">
+     <td></td>
+     <td colspan="3" style="background-image:url('images/banner.gif')"></td>
+    </tr> 
+    <tr height="20" class> 
+     <td class="mainHeader">&nbsp;</td> 
+     <td colspan="2" class="mainHeader"> 
+      <table width="100%" class="tableheader"> 
+       <tbody>
+        <tr> 
+         <td> <span id="header" class="tableheader">ΣΚΛΑΒΟΥΝΟΥ ΠΑΡΑΣΚΕΥΗ</span> <span class="tableheader" id="subheader">(Ρ19077)</span> <span class="tableheader" id="subheader2"></span> </td> 
+         <td colspan="2" align="right" class="subheader" nowrap="true"><i>όνομα χρήστη:r19077</i></td> 
+        </tr>
+       </tbody>
+      </table> </td> 
+     <td width="50px" class="mainheader">&nbsp;&nbsp;&nbsp;&nbsp;</td> 
+    </tr> 
+    <tr height="20"> 
+     <td class="leftcolumn">&nbsp;</td> 
+     <td colspan="2" class="subheader"> 
+      <table width="100%" style="border-top:1px solid #A8A761;border-bottom:1px solid #A8A761"> 
+       <tbody>
+        <tr> 
+         <td colspan="2" class="subheader"> <span id="pagedesc">Περιγραφή σελίδας</span> </td>
+        </tr>
+       </tbody>
+      </table> </td> 
+     <td width="50px" class="rightColumn">&nbsp;&nbsp;&nbsp;&nbsp;</td> 
+    </tr> 
+    <tr> 
+     <td id="separator" valign="top" class="subHeaderBack" style="border-right:1px solid #a8a761;" width="1px" rowspan="2">&nbsp;</td> 
+     <td width="100%" id="main" valign="top" colspan="2"> <script>
+	
+function checkBrowser(){
+	this.ver=navigator.appVersion
+	this.dom=document.getElementById?1:0
+	this.ie5=((this.ver.indexOf("MSIE 5")>-1 || this.ver.indexOf("MSIE 6")>-1) && this.dom)?1:0;
+	this.ie4=(document.all && !this.dom)?1:0;
+	this.ns5=(this.dom && parseInt(this.ver) >= 5) ?1:0;
+	this.ns4=(document.layers && !this.dom)?1:0;
+	this.bw=(this.ie5 || this.ie4 || this.ns4 || this.ns5)
+	return this
+}
+
+var bw=new checkBrowser()
+
+if (document.body.offsetHeight>84)
+{
+	document.getElementById("separator").style.height =document.body.offsetHeight-84
+	document.getElementById("main").style.height=document.body.offsetHeight-84-100
+}
+function resized(){
+
+	if (document.body.offsetHeight>84)
+	{
+		document.getElementById("separator").style.height =document.body.offsetHeight-84
+		document.getElementById("main").style.height=document.body.offsetHeight-84-100
+	}
+}
+	setTimeout("window.onresize=resized;",500)
+
+</script> <script language="javascript">
+	function onload(menuID)
+	{
+		var mnu;
+		var submnu;
+		var img;
+		var menu="";
+		menu=""
+		
+		// show which item is selected
+		if (menu!="")
+		{
+			if (menu.indexOf(";")!=-1)
+			{
+				// to mnuID apoteleitai apo menuID +";" + "submenuID"
+				mnu=menu.substring(0,menu.indexOf(";"))
+				submnu=menu.substring(menu.indexOf(";")+1)
+				if (document.getElementById(mnu))
+					document.getElementById(mnu).childNodes[1].style.display=""
+					img="images/flevel0SubSel.gif"
+			}
+			else
+			{	
+				mnu=menu
+				img="images/flevel0Sel.gif"
+			
+			}
+			if (document.getElementById(mnu))
+				document.getElementById(mnu).style.backgroundImage="url("+ img+ ")"
+		}
+	}	
+	onload("")
+</script>   
+      <div style="margin-top:20;"> 
+       <form method="POST" action id="frm1" name="frm1"> 
+        <table border="0" cellpadding="4" cellspacing="2" width="95%" align="center" id="mainTable"> 
+         <!--<tr height="30">        <td width="40%" valign="top" height="25">        	<img src="Images/grade.gif" align="center" WIDTH="22" HEIGHT="28">        	<span class="tablebold"> Λίστα Βαθμολογίας</span>               	</td>          	  	   	</tr>--> 
+         <tbody>
+          <tr> 
+           <td width="40%" align height="20" valign="middle"> Ταξινόμηση: <select size="1" name="sortBy" onchange="frm1.submit()" style="border: 1 solid #CCCCCC"> <option value="title">κατά τίτλο</option> <option value="coursecode">κατά κωδικό</option> <option value="cyear">κατά ακαδ.έτος</option> <option selected value="csem">ανά εξάμηνο</option> <option value="ctypeID">ανά τύπο</option> </select> </td> 
+           <td width="100%" align="right" height="20"> <img src="images/course1.gif" WIDTH="16" HEIGHT="16">&nbsp;<i>Απλό μάθημα</i>&nbsp;<img src="images/course4.gif" WIDTH="16" HEIGHT="16">&nbsp;<i>Σύνθετο μάθημα</i> &nbsp;<img src="images/course8.gif" WIDTH="16" HEIGHT="16">&nbsp;<i>Μέρος σύνθετου μαθήματος</i> </td>
+          </tr> 
+          <!--?xml version="1.0" encoding="UTF-16"?-->
+          <tr>
+           <td colspan="2">
+            <table border="0" cellpadding="4" cellspacing="0" width="100%" align="center">
+             <tbody>
+              <tr>
+               <td colspan="10" class="groupHeader">Εξάμηνο 1</td>
+              </tr>
+              <tr height="25" class="italicHeader">
+               <td valign="top"></td>
+               <td colspan="2" valign="top">Μάθημα</td>
+               <td valign="top">Τύπος</td>
+               <td valign="top">ΔΜ</td>
+               <td valign="top">Ώρες</td>
+               <td valign="top">ECTS</td>
+               <td valign="top">Βαθμός</td>
+               <td valign="top">Εξεταστική</td>
+              </tr>
+              <tr height="25" bgcolor="#fafafa">
+               <td valign="top">&nbsp;<img align="absbottom" src="images/course1.gif" width="16"></td>
+               <td colspan="2" valign="top" class="topBorderLight">(ΤΣΚ104)&nbsp; ΕΙΣΑΓΩΓΗ ΣΤΗΝ ΠΛΗΡΟΦΟΡΙΚΗ<span class="redfonts"></span></td>
+               <td valign="top" class="topBorderLight">ΥΠΟΧΡΕΩΤΙΚΟ</td>
+               <td valign="top" class="topBorderLight"> 3</td>
+               <td valign="top" class="topBorderLight">3</td>
+               <td valign="top" class="topBorderLight"> 5</td>
+               <td valign="top" class="topBorderLight"><span class="redFonts">5</span></td>
+               <td nowrap="true" class="topBorderLight"><span class="tablecell"><i>ΦΕΒΡ&nbsp; 2019-2020</i></span></td>
+              </tr>
+              <tr height="25" bgcolor="#fafafa">
+               <td valign="top">&nbsp;<img align="absbottom" src="images/course1.gif" width="16"></td>
+               <td colspan="2" valign="top" class="topBorderLight">(ΤΣΚ103)&nbsp; ΕΙΣΑΓΩΓΗ ΣΤΟ ΜΑΝΑΤΖΜΕΝΤ<span class="redfonts"></span></td>
+               <td valign="top" class="topBorderLight">ΥΠΟΧΡΕΩΤΙΚΟ</td>
+               <td valign="top" class="topBorderLight"> 3</td>
+               <td valign="top" class="topBorderLight">3</td>
+               <td valign="top" class="topBorderLight"> 6</td>
+               <td valign="top" class="topBorderLight"><span class="redFonts">5</span></td>
+               <td nowrap="true" class="topBorderLight"><span class="tablecell"><i>ΦΕΒΡ&nbsp; 2019-2020</i></span></td>
+              </tr>
+              <tr height="25" bgcolor="#fafafa">
+               <td valign="top">&nbsp;<img align="absbottom" src="images/course1.gif" width="16"></td>
+               <td colspan="2" valign="top" class="topBorderLight">(ΤΣΚ101)&nbsp; ΕΙΣΑΓΩΓΗ ΣΤΟΝ ΤΟΥΡΙΣΜΟ - ΤΟΥΡΙΣΤΙΚΗ ΓΕΩΓΡΑΦΙΑ<span class="redfonts"></span></td>
+               <td valign="top" class="topBorderLight">ΥΠΟΧΡΕΩΤΙΚΟ</td>
+               <td valign="top" class="topBorderLight"> 3</td>
+               <td valign="top" class="topBorderLight">3</td>
+               <td valign="top" class="topBorderLight"> 6</td>
+               <td valign="top" class="topBorderLight"><span class="redFonts">5</span></td>
+               <td nowrap="true" class="topBorderLight"><span class="tablecell"><i>ΦΕΒΡ&nbsp; 2019-2020</i></span></td>
+              </tr>
+              <tr height="25" bgcolor="#fafafa">
+               <td valign="top">&nbsp;<img align="absbottom" src="images/course1.gif" width="16"></td>
+               <td colspan="2" valign="top" class="topBorderLight">(ΤΣΚ105)&nbsp; ΕΠΙΧΕΙΡΗΜΑΤΙΚΗ ΣΤΑΤΙΣΤΙΚΗ<span class="redfonts"></span></td>
+               <td valign="top" class="topBorderLight">ΥΠΟΧΡΕΩΤΙΚΟ</td>
+               <td valign="top" class="topBorderLight"> 3</td>
+               <td valign="top" class="topBorderLight">3</td>
+               <td valign="top" class="topBorderLight"> 5</td>
+               <td valign="top" class="topBorderLight"><span class="redFonts">8</span></td>
+               <td nowrap="true" class="topBorderLight"><span class="tablecell"><i>ΦΕΒΡ&nbsp; 2019-2020</i></span></td>
+              </tr>
+              <tr height="25" bgcolor="#fafafa">
+               <td valign="top">&nbsp;<img align="absbottom" src="images/course1.gif" width="16"></td>
+               <td colspan="2" valign="top" class="topBorderLight">(ΤΣΚ102)&nbsp; ΜΙΚΡΟΟΙΚΟΝΟΜΙΚΗ<span class="redfonts"></span></td>
+               <td valign="top" class="topBorderLight">ΥΠΟΧΡΕΩΤΙΚΟ</td>
+               <td valign="top" class="topBorderLight"> 3</td>
+               <td valign="top" class="topBorderLight">3</td>
+               <td valign="top" class="topBorderLight"> 5</td>
+               <td valign="top" class="topBorderLight"><span class="redFonts">5</span></td>
+               <td nowrap="true" class="topBorderLight"><span class="tablecell"><i>ΦΕΒΡ&nbsp; 2019-2020</i></span></td>
+              </tr>
+              <tr height="25" bgcolor="#fafafa">
+               <td valign="top">&nbsp;<img align="absbottom" src="images/course1.gif" width="16"></td>
+               <td colspan="2" valign="top" class="topBorderLight">(ΤΣΑΓΓ101)&nbsp; ΑΓΓΛΙΚΑ Ι<span class="redfonts"></span></td>
+               <td valign="top" class="topBorderLight">ΞΕΝΗ ΓΛΩΣΣΑ</td>
+               <td valign="top" class="topBorderLight"> 3</td>
+               <td valign="top" class="topBorderLight">3</td>
+               <td valign="top" class="topBorderLight"> 3</td>
+               <td valign="top" class="topBorderLight"><span class="redFonts">6</span></td>
+               <td nowrap="true" class="topBorderLight"><span class="tablecell"><i>ΦΕΒΡ&nbsp; 2019-2020</i></span></td>
+              </tr>
+              <tr height="20" class="subHeaderBack">
+               <td colspan="3">Σύνολα περασμένων μαθημάτων εξαμήνου: <b>6</b></td>
+               <td colspan="10" nowrap="true" align="right" class="tablecell">ΜΟ:&nbsp; <span class="error">5.67</span> ΔΜ:&nbsp; <span class="error">18&nbsp;</span> Ώρες:&nbsp; <span class="error">18&nbsp;</span> ECTS:&nbsp; <span class="error">30&nbsp;</span></td>
+              </tr>
+              <tr>
+               <td colspan="10" class="groupHeader">Εξάμηνο 2</td>
+              </tr>
+              <tr height="25" class="italicHeader">
+               <td valign="top"></td>
+               <td colspan="2" valign="top">Μάθημα</td>
+               <td valign="top">Τύπος</td>
+               <td valign="top">ΔΜ</td>
+               <td valign="top">Ώρες</td>
+               <td valign="top">ECTS</td>
+               <td valign="top">Βαθμός</td>
+               <td valign="top">Εξεταστική</td>
+              </tr>
+              <tr height="25" bgcolor="#fafafa">
+               <td valign="top">&nbsp;<img align="absbottom" src="images/course1.gif" width="16"></td>
+               <td colspan="2" valign="top" class="topBorderLight">(ΤΣΚ205)&nbsp; ΔΙΑΧΕΙΡΙΣΗ ΤΕΧΝΟΛΟΓΙΑΣ ΚΑΙ ΚΑΙΝΟΤΟΜΙΑΣ ΣΤΟΝ ΤΟΥΡΙΣΤΙΚΟ ΤΟΜΕΑ<span class="redfonts"></span></td>
+               <td valign="top" class="topBorderLight">ΥΠΟΧΡΕΩΤΙΚΟ</td>
+               <td valign="top" class="topBorderLight"> 3</td>
+               <td valign="top" class="topBorderLight">3</td>
+               <td valign="top" class="topBorderLight"> 5</td>
+               <td valign="top" class="topBorderLight"><span class="redFonts">9</span></td>
+               <td nowrap="true" class="topBorderLight"><span class="tablecell"><i>ΙΟΥΝ&nbsp; 2019-2020</i></span></td>
+              </tr>
+              <tr height="25" bgcolor="#fafafa">
+               <td valign="top">&nbsp;<img align="absbottom" src="images/course1.gif" width="16"></td>
+               <td colspan="2" valign="top" class="topBorderLight">(ΤΣΚ204)&nbsp; ΔΙΟΙΚΗΣΗ ΑΝΘΡΩΠΙΝΟΥ ΠΑΡΑΓΟΝΤΑ ΣΕ ΤΟΥΡΙΣΤΙΚΕΣ ΕΠΙΧΕΙΡΗΣΕΙΣ<span class="redfonts"></span></td>
+               <td valign="top" class="topBorderLight">ΥΠΟΧΡΕΩΤΙΚΟ</td>
+               <td valign="top" class="topBorderLight"> 3</td>
+               <td valign="top" class="topBorderLight">3</td>
+               <td valign="top" class="topBorderLight"> 6</td>
+               <td valign="top" class="topBorderLight"><span class="redFonts">7</span></td>
+               <td nowrap="true" class="topBorderLight"><span class="tablecell"><i>ΙΟΥΝ&nbsp; 2019-2020</i></span></td>
+              </tr>
+              <tr height="25" bgcolor="#fafafa">
+               <td valign="top">&nbsp;<img align="absbottom" src="images/course1.gif" width="16"></td>
+               <td colspan="2" valign="top" class="topBorderLight">(ΤΣΚ203)&nbsp; ΛΟΓΙΣΤΙΚΗ ΓΙΑ ΤΟΥΡΙΣΤΙΚΕΣ ΕΠΙΧΕΙΡΗΣΕΙΣ<span class="redfonts"></span></td>
+               <td valign="top" class="topBorderLight">ΥΠΟΧΡΕΩΤΙΚΟ</td>
+               <td valign="top" class="topBorderLight"> 3</td>
+               <td valign="top" class="topBorderLight">3</td>
+               <td valign="top" class="topBorderLight"> 5</td>
+               <td valign="top" class="topBorderLight"><span class="redFonts">10</span></td>
+               <td nowrap="true" class="topBorderLight"><span class="tablecell"><i>ΙΟΥΝ&nbsp; 2019-2020</i></span></td>
+              </tr>
+              <tr height="25" bgcolor="#fafafa">
+               <td valign="top">&nbsp;<img align="absbottom" src="images/course1.gif" width="16"></td>
+               <td colspan="2" valign="top" class="topBorderLight">(ΤΣΚ201)&nbsp; ΜΑΚΡΟΟΙΚΟΝΟΜΙΚΗ<span class="redfonts"></span></td>
+               <td valign="top" class="topBorderLight">ΥΠΟΧΡΕΩΤΙΚΟ</td>
+               <td valign="top" class="topBorderLight"> 3</td>
+               <td valign="top" class="topBorderLight">3</td>
+               <td valign="top" class="topBorderLight"> 5</td>
+               <td valign="top" class="topBorderLight"><span class="redFonts">8</span></td>
+               <td nowrap="true" class="topBorderLight"><span class="tablecell"><i>ΙΟΥΝ&nbsp; 2019-2020</i></span></td>
+              </tr>
+              <tr height="25" bgcolor="#fafafa">
+               <td valign="top">&nbsp;<img align="absbottom" src="images/course1.gif" width="16"></td>
+               <td colspan="2" valign="top" class="topBorderLight">(ΤΣΚ202)&nbsp; ΝΕΕΣ ΤΕΧΝΟΛΟΓΙΕΣ ΣΤΟΝ ΤΟΥΡΙΣΜΟ<span class="redfonts"></span></td>
+               <td valign="top" class="topBorderLight">ΥΠΟΧΡΕΩΤΙΚΟ</td>
+               <td valign="top" class="topBorderLight"> 3</td>
+               <td valign="top" class="topBorderLight">5</td>
+               <td valign="top" class="topBorderLight"> 6</td>
+               <td valign="top" class="topBorderLight"><span class="redFonts">10</span></td>
+               <td nowrap="true" class="topBorderLight"><span class="tablecell"><i>ΙΟΥΝ&nbsp; 2019-2020</i></span></td>
+              </tr>
+              <tr height="25" bgcolor="#fafafa">
+               <td valign="top">&nbsp;<img align="absbottom" src="images/course1.gif" width="16"></td>
+               <td colspan="2" valign="top" class="topBorderLight">(ΤΣΑΓΓ201)&nbsp; ΑΓΓΛΙΚΑ ΙΙ<span class="redfonts"></span></td>
+               <td valign="top" class="topBorderLight">ΞΕΝΗ ΓΛΩΣΣΑ</td>
+               <td valign="top" class="topBorderLight"> 3</td>
+               <td valign="top" class="topBorderLight">3</td>
+               <td valign="top" class="topBorderLight"> 3</td>
+               <td valign="top" class="topBorderLight"><span class="redFonts">7</span></td>
+               <td nowrap="true" class="topBorderLight"><span class="tablecell"><i>ΙΟΥΝ&nbsp; 2019-2020</i></span></td>
+              </tr>
+              <tr height="20" class="subHeaderBack">
+               <td colspan="3">Σύνολα περασμένων μαθημάτων εξαμήνου: <b>6</b></td>
+               <td colspan="10" nowrap="true" align="right" class="tablecell">ΜΟ:&nbsp; <span class="error">8.50</span> ΔΜ:&nbsp; <span class="error">18&nbsp;</span> Ώρες:&nbsp; <span class="error">20&nbsp;</span> ECTS:&nbsp; <span class="error">30&nbsp;</span></td>
+              </tr>
+              <tr>
+               <td colspan="10" class="groupHeader">Εξάμηνο 3</td>
+              </tr>
+              <tr height="25" class="italicHeader">
+               <td valign="top"></td>
+               <td colspan="2" valign="top">Μάθημα</td>
+               <td valign="top">Τύπος</td>
+               <td valign="top">ΔΜ</td>
+               <td valign="top">Ώρες</td>
+               <td valign="top">ECTS</td>
+               <td valign="top">Βαθμός</td>
+               <td valign="top">Εξεταστική</td>
+              </tr>
+              <tr height="25" bgcolor="#fafafa">
+               <td valign="top">&nbsp;<img align="absbottom" src="images/course1.gif" width="16"></td>
+               <td colspan="2" valign="top" class="topBorderLight">(ΤΣΚ302)&nbsp; ΔΙΕΘΝΗΣ ΟΙΚΟΝΟΜΙΚΗ ΚΑΙ ΔΙΕΘΝΗΣ ΤΟΥΡΙΣΤΙΚΗ ΑΓΟΡΑ<span class="redfonts"></span></td>
+               <td valign="top" class="topBorderLight">ΥΠΟΧΡΕΩΤΙΚΟ</td>
+               <td valign="top" class="topBorderLight"> 3</td>
+               <td valign="top" class="topBorderLight">3</td>
+               <td valign="top" class="topBorderLight"> 5</td>
+               <td valign="top" class="topBorderLight"><span class="redFonts">7</span></td>
+               <td nowrap="true" class="topBorderLight"><span class="tablecell"><i>ΦΕΒΡ&nbsp; 2020-2021</i></span></td>
+              </tr>
+              <tr height="25" bgcolor="#fafafa">
+               <td valign="top">&nbsp;<img align="absbottom" src="images/course1.gif" width="16"></td>
+               <td colspan="2" valign="top" class="topBorderLight">(ΤΣΚ301)&nbsp; ΠΛΗΡΟΦΟΡΙΑΚΑ ΣΥΣΤΗΜΑΤΑ ΚΑΙ ΥΠΟΣΤΗΡΙΞΗ ΑΠΟΦΑΣΕΩΝ ΓΙΑ ΤΟΥΡΙΣΤΙΚΕΣ ΕΠΙΧΕΙΡΗΣΕΙΣ<span class="redfonts"></span></td>
+               <td valign="top" class="topBorderLight">ΥΠΟΧΡΕΩΤΙΚΟ</td>
+               <td valign="top" class="topBorderLight"> 3</td>
+               <td valign="top" class="topBorderLight">3</td>
+               <td valign="top" class="topBorderLight"> 6</td>
+               <td valign="top" class="topBorderLight"><span class="redFonts">7</span></td>
+               <td nowrap="true" class="topBorderLight"><span class="tablecell"><i>ΦΕΒΡ&nbsp; 2020-2021</i></span></td>
+              </tr>
+              <tr height="25" bgcolor="#fafafa">
+               <td valign="top">&nbsp;<img align="absbottom" src="images/course1.gif" width="16"></td>
+               <td colspan="2" valign="top" class="topBorderLight">(ΤΣΚ303)&nbsp; ΤΟΥΡΙΣΤΙΚΗ ΟΙΚΟΝΟΜΙΚΗ - ΤΟΥΡΙΣΤΙΚΗ ΚΟΙΝΩΝΙΟΛΟΓΙΑ<span class="redfonts"></span></td>
+               <td valign="top" class="topBorderLight">ΥΠΟΧΡΕΩΤΙΚΟ</td>
+               <td valign="top" class="topBorderLight"> 3</td>
+               <td valign="top" class="topBorderLight">3</td>
+               <td valign="top" class="topBorderLight"> 5</td>
+               <td valign="top" class="topBorderLight"><span class="redFonts">7</span></td>
+               <td nowrap="true" class="topBorderLight"><span class="tablecell"><i>ΦΕΒΡ&nbsp; 2020-2021</i></span></td>
+              </tr>
+              <tr height="25" bgcolor="#fafafa">
+               <td valign="top">&nbsp;<img align="absbottom" src="images/course1.gif" width="16"></td>
+               <td colspan="2" valign="top" class="topBorderLight">(ΤΣΚ305)&nbsp; ΤΟΥΡΙΣΤΙΚΟ ΔΙΚΑΙΟ<span class="redfonts"></span></td>
+               <td valign="top" class="topBorderLight">ΥΠΟΧΡΕΩΤΙΚΟ</td>
+               <td valign="top" class="topBorderLight"> 3</td>
+               <td valign="top" class="topBorderLight">3</td>
+               <td valign="top" class="topBorderLight"> 5</td>
+               <td valign="top" class="topBorderLight"><span class="redFonts">8</span></td>
+               <td nowrap="true" class="topBorderLight"><span class="tablecell"><i>ΦΕΒΡ&nbsp; 2020-2021</i></span></td>
+              </tr>
+              <tr height="25" bgcolor="#fafafa">
+               <td valign="top">&nbsp;<img align="absbottom" src="images/course1.gif" width="16"></td>
+               <td colspan="2" valign="top" class="topBorderLight">(ΤΣΚ304)&nbsp; ΤΟΥΡΙΣΤΙΚΟ ΜΑΡΚΕΤΙΝΓΚ<span class="redfonts"></span></td>
+               <td valign="top" class="topBorderLight">ΥΠΟΧΡΕΩΤΙΚΟ</td>
+               <td valign="top" class="topBorderLight"> 3</td>
+               <td valign="top" class="topBorderLight">3</td>
+               <td valign="top" class="topBorderLight"> 6</td>
+               <td valign="top" class="topBorderLight"><span class="redFonts">5</span></td>
+               <td nowrap="true" class="topBorderLight"><span class="tablecell"><i>ΦΕΒΡ&nbsp; 2020-2021</i></span></td>
+              </tr>
+              <tr height="25" bgcolor="#fafafa">
+               <td valign="top">&nbsp;<img align="absbottom" src="images/course1.gif" width="16"></td>
+               <td colspan="2" valign="top" class="topBorderLight">(ΤΣΑΓΓ301)&nbsp; ΑΓΓΛΙΚΑ ΙΙΙ<span class="redfonts"></span></td>
+               <td valign="top" class="topBorderLight">ΞΕΝΗ ΓΛΩΣΣΑ</td>
+               <td valign="top" class="topBorderLight"> 3</td>
+               <td valign="top" class="topBorderLight">3</td>
+               <td valign="top" class="topBorderLight"> 3</td>
+               <td valign="top" class="topBorderLight"><span class="redFonts">9</span></td>
+               <td nowrap="true" class="topBorderLight"><span class="tablecell"><i>ΣΕΠΤ&nbsp; 2020-2021</i></span></td>
+              </tr>
+              <tr height="20" class="subHeaderBack">
+               <td colspan="3">Σύνολα περασμένων μαθημάτων εξαμήνου: <b>6</b></td>
+               <td colspan="10" nowrap="true" align="right" class="tablecell">ΜΟ:&nbsp; <span class="error">7.17</span> ΔΜ:&nbsp; <span class="error">18&nbsp;</span> Ώρες:&nbsp; <span class="error">18&nbsp;</span> ECTS:&nbsp; <span class="error">30&nbsp;</span></td>
+              </tr>
+              <tr>
+               <td colspan="10" class="groupHeader">Εξάμηνο 4</td>
+              </tr>
+              <tr height="25" class="italicHeader">
+               <td valign="top"></td>
+               <td colspan="2" valign="top">Μάθημα</td>
+               <td valign="top">Τύπος</td>
+               <td valign="top">ΔΜ</td>
+               <td valign="top">Ώρες</td>
+               <td valign="top">ECTS</td>
+               <td valign="top">Βαθμός</td>
+               <td valign="top">Εξεταστική</td>
+              </tr>
+              <tr height="25" bgcolor="#fafafa">
+               <td valign="top">&nbsp;<img align="absbottom" src="images/course1.gif" width="16"></td>
+               <td colspan="2" valign="top" class="topBorderLight">(ΤΣΚ404)&nbsp; e-TOURISM ΚΑΙ m-TOURISM ΣΤΟ ΔΙΕΘΝΕΣ ΠΕΡΙΒΑΛΛΟΝ<span class="redfonts"></span></td>
+               <td valign="top" class="topBorderLight">ΥΠΟΧΡΕΩΤΙΚΟ</td>
+               <td valign="top" class="topBorderLight"> 3</td>
+               <td valign="top" class="topBorderLight">3</td>
+               <td valign="top" class="topBorderLight"> 6</td>
+               <td valign="top" class="topBorderLight"><span class="redFonts">10</span></td>
+               <td nowrap="true" class="topBorderLight"><span class="tablecell"><i>ΙΟΥΝ&nbsp; 2020-2021</i></span></td>
+              </tr>
+              <tr height="25" bgcolor="#fafafa">
+               <td valign="top">&nbsp;<img align="absbottom" src="images/course1.gif" width="16"></td>
+               <td colspan="2" valign="top" class="topBorderLight">(ΤΣΚ402)&nbsp; ΕΡΕΥΝΑ ΚΑΙ ΑΝΑΛΥΣΗ ΤΗΣ ΤΟΥΡΙΣΤΙΚΗΣ ΑΓΟΡΑΣ<span class="redfonts"></span></td>
+               <td valign="top" class="topBorderLight">ΥΠΟΧΡΕΩΤΙΚΟ</td>
+               <td valign="top" class="topBorderLight"> 3</td>
+               <td valign="top" class="topBorderLight">3</td>
+               <td valign="top" class="topBorderLight"> 6</td>
+               <td valign="top" class="topBorderLight"><span class="redFonts">8</span></td>
+               <td nowrap="true" class="topBorderLight"><span class="tablecell"><i>ΙΟΥΝ&nbsp; 2020-2021</i></span></td>
+              </tr>
+              <tr height="25" bgcolor="#fafafa">
+               <td valign="top">&nbsp;<img align="absbottom" src="images/course1.gif" width="16"></td>
+               <td colspan="2" valign="top" class="topBorderLight">(ΤΣΚ403)&nbsp; ΤΟΥΡΙΣΜΟΣ ΚΑΙ ΠΕΡΙΒΑΛΛΟΝ: ΒΙΩΣΙΜΟΣ ΤΟΥΡΙΣΜΟΣ<span class="redfonts"></span></td>
+               <td valign="top" class="topBorderLight">ΥΠΟΧΡΕΩΤΙΚΟ</td>
+               <td valign="top" class="topBorderLight"> 3</td>
+               <td valign="top" class="topBorderLight">3</td>
+               <td valign="top" class="topBorderLight"> 5</td>
+               <td valign="top" class="topBorderLight"><span class="redFonts">8</span></td>
+               <td nowrap="true" class="topBorderLight"><span class="tablecell"><i>ΙΟΥΝ&nbsp; 2020-2021</i></span></td>
+              </tr>
+              <tr height="25" bgcolor="#fafafa">
+               <td valign="top">&nbsp;<img align="absbottom" src="images/course1.gif" width="16"></td>
+               <td colspan="2" valign="top" class="topBorderLight">(ΤΣΚ405)&nbsp; ΤΟΥΡΙΣΤΙΚΗ ΕΠΙΧΕΙΡΗΜΑΤΙΚΟΤΗΤΑ<span class="redfonts"></span></td>
+               <td valign="top" class="topBorderLight">ΥΠΟΧΡΕΩΤΙΚΟ</td>
+               <td valign="top" class="topBorderLight"> 3</td>
+               <td valign="top" class="topBorderLight">3</td>
+               <td valign="top" class="topBorderLight"> 5</td>
+               <td valign="top" class="topBorderLight"><span class="redFonts">10</span></td>
+               <td nowrap="true" class="topBorderLight"><span class="tablecell"><i>ΙΟΥΝ&nbsp; 2020-2021</i></span></td>
+              </tr>
+              <tr height="25" bgcolor="#fafafa">
+               <td valign="top">&nbsp;<img align="absbottom" src="images/course1.gif" width="16"></td>
+               <td colspan="2" valign="top" class="topBorderLight">(ΤΣΚ401)&nbsp; ΤΟΥΡΙΣΤΙΚΗ ΚΑΤΑΝΑΛΩΤΙΚΗ ΣΥΜΠΕΡΙΦΟΡΑ ΚΑΙ ΨΥΧΟΛΟΓΙΑ<span class="redfonts"></span></td>
+               <td valign="top" class="topBorderLight">ΥΠΟΧΡΕΩΤΙΚΟ</td>
+               <td valign="top" class="topBorderLight"> 3</td>
+               <td valign="top" class="topBorderLight">3</td>
+               <td valign="top" class="topBorderLight"> 5</td>
+               <td valign="top" class="topBorderLight"><span class="redFonts">8</span></td>
+               <td nowrap="true" class="topBorderLight"><span class="tablecell"><i>ΙΟΥΝ&nbsp; 2020-2021</i></span></td>
+              </tr>
+              <tr height="25" bgcolor="#fafafa">
+               <td valign="top">&nbsp;<img align="absbottom" src="images/course1.gif" width="16"></td>
+               <td colspan="2" valign="top" class="topBorderLight">(ΤΣΑΓΓ401)&nbsp; ΑΓΓΛΙΚΑ IV<span class="redfonts"></span></td>
+               <td valign="top" class="topBorderLight">ΞΕΝΗ ΓΛΩΣΣΑ</td>
+               <td valign="top" class="topBorderLight"> 3</td>
+               <td valign="top" class="topBorderLight">3</td>
+               <td valign="top" class="topBorderLight"> 3</td>
+               <td valign="top" class="topBorderLight"><span class="redFonts">8</span></td>
+               <td nowrap="true" class="topBorderLight"><span class="tablecell"><i>ΙΟΥΝ&nbsp; 2020-2021</i></span></td>
+              </tr>
+              <tr height="20" class="subHeaderBack">
+               <td colspan="3">Σύνολα περασμένων μαθημάτων εξαμήνου: <b>6</b></td>
+               <td colspan="10" nowrap="true" align="right" class="tablecell">ΜΟ:&nbsp; <span class="error">8.67</span> ΔΜ:&nbsp; <span class="error">18&nbsp;</span> Ώρες:&nbsp; <span class="error">18&nbsp;</span> ECTS:&nbsp; <span class="error">30&nbsp;</span></td>
+              </tr>
+              <tr>
+               <td colspan="10" class="groupHeader">Εξάμηνο 5</td>
+              </tr>
+              <tr height="25" class="italicHeader">
+               <td valign="top"></td>
+               <td colspan="2" valign="top">Μάθημα</td>
+               <td valign="top">Τύπος</td>
+               <td valign="top">ΔΜ</td>
+               <td valign="top">Ώρες</td>
+               <td valign="top">ECTS</td>
+               <td valign="top">Βαθμός</td>
+               <td valign="top">Εξεταστική</td>
+              </tr>
+              <tr height="25" bgcolor="#fafafa">
+               <td valign="top">&nbsp;<img align="absbottom" src="images/course1.gif" width="16"></td>
+               <td colspan="2" valign="top" class="topBorderLight">(ΤΣΚ502)&nbsp; ΕΝΑΛΛΑΚΤΙΚΕΣ ΚΑΙ ΕΙΔΙΚΕΣ ΜΟΡΦΕΣ ΤΟΥΡΙΣΜΟΥ<span class="redfonts"></span></td>
+               <td valign="top" class="topBorderLight">ΥΠΟΧΡΕΩΤΙΚΟ</td>
+               <td valign="top" class="topBorderLight"> 3</td>
+               <td valign="top" class="topBorderLight">3</td>
+               <td valign="top" class="topBorderLight"> 6</td>
+               <td valign="top" class="topBorderLight"><span class="redFonts">-</span></td>
+               <td nowrap="true" class="topBorderLight"><span class="redFonts"><i>-</i></span></td>
+              </tr>
+              <tr height="25" bgcolor="#fafafa">
+               <td valign="top">&nbsp;<img align="absbottom" src="images/course1.gif" width="16"></td>
+               <td colspan="2" valign="top" class="topBorderLight">(ΤΣΚ503)&nbsp; ΟΡΓΑΝΩΣΗ ΚΑΙ ΔΙΟΙΚΗΣΗ ΞΕΝΟΔΟΧΕΙΑΚΩΝ ΕΠΙΧΕΙΡΗΣΕΩΝ<span class="redfonts"></span></td>
+               <td valign="top" class="topBorderLight">ΥΠΟΧΡΕΩΤΙΚΟ</td>
+               <td valign="top" class="topBorderLight"> 3</td>
+               <td valign="top" class="topBorderLight">3</td>
+               <td valign="top" class="topBorderLight"> 6</td>
+               <td valign="top" class="topBorderLight"><span class="redFonts">-</span></td>
+               <td nowrap="true" class="topBorderLight"><span class="redFonts"><i>-</i></span></td>
+              </tr>
+              <tr height="25" bgcolor="#fafafa">
+               <td valign="top">&nbsp;<img align="absbottom" src="images/course1.gif" width="16"></td>
+               <td colspan="2" valign="top" class="topBorderLight">(ΤΣΚ501)&nbsp; ΣΤΡΑΤΗΓΙΚΕΣ ΚΑΙ ΠΟΛΙΤΙΚΕΣ ΤΟΥΡΙΣΤΙΚΗΣ ΑΝΑΠΤΥΞΗΣ<span class="redfonts"></span></td>
+               <td valign="top" class="topBorderLight">ΥΠΟΧΡΕΩΤΙΚΟ</td>
+               <td valign="top" class="topBorderLight"> 3</td>
+               <td valign="top" class="topBorderLight">3</td>
+               <td valign="top" class="topBorderLight"> 6</td>
+               <td valign="top" class="topBorderLight"><span class="redFonts">-</span></td>
+               <td nowrap="true" class="topBorderLight"><span class="redFonts"><i>-</i></span></td>
+              </tr>
+              <tr height="25" bgcolor="#fafafa">
+               <td valign="top">&nbsp;<img align="absbottom" src="images/course1.gif" width="16"></td>
+               <td colspan="2" valign="top" class="topBorderLight">(ΤΣΚ512)&nbsp; ΟΙΚΟΝΟΜΙΚΟΣ ΠΡΟΓΡΑΜΜΑΤΙΣΜΟΣ ΚΑΙ ΛΗΨΗ ΑΠΟΦΑΣΕΩΝ ΕΠΙΧΕΙΡΗΣΕΩΝ ΦΙΛΟΞΕΝΙΑΣ<span class="redfonts"></span></td>
+               <td valign="top" class="topBorderLight">ΕΠΙΛΟΓΗΣ</td>
+               <td valign="top" class="topBorderLight"> 3</td>
+               <td valign="top" class="topBorderLight">3</td>
+               <td valign="top" class="topBorderLight"> 4</td>
+               <td valign="top" class="topBorderLight"><span class="redFonts">-</span></td>
+               <td nowrap="true" class="topBorderLight"><span class="redFonts"><i>-</i></span></td>
+              </tr>
+              <tr height="25" bgcolor="#fafafa">
+               <td valign="top">&nbsp;<img align="absbottom" src="images/course1.gif" width="16"></td>
+               <td colspan="2" valign="top" class="topBorderLight">(ΤΣΚ511)&nbsp; ΧΡΗΜΑΤΟΔΟΤΙΚΑ ΠΡΟΓΡΑΜΜΑΤΑ ΓΙΑ ΤΟΝ ΤΟΥΡΙΣΜΟ<span class="redfonts"></span></td>
+               <td valign="top" class="topBorderLight">ΕΠΙΛΟΓΗΣ</td>
+               <td valign="top" class="topBorderLight"> 3</td>
+               <td valign="top" class="topBorderLight">3</td>
+               <td valign="top" class="topBorderLight"> 4</td>
+               <td valign="top" class="topBorderLight"><span class="redFonts">-</span></td>
+               <td nowrap="true" class="topBorderLight"><span class="redFonts"><i>-</i></span></td>
+              </tr>
+              <tr height="25" bgcolor="#fafafa">
+               <td valign="top">&nbsp;<img align="absbottom" src="images/course1.gif" width="16"></td>
+               <td colspan="2" valign="top" class="topBorderLight">(ΤΣΑΓΓ501)&nbsp; ΑΓΓΛΙΚΑ ΓΙΑ ΔΙΑΠΟΛΙΤΙΣΜΙΚΗ ΕΠΙΚΟΙΝΩΝΙΑ<span class="redfonts"></span></td>
+               <td valign="top" class="topBorderLight">ΞΕΝΗ ΓΛΩΣΣΑ</td>
+               <td valign="top" class="topBorderLight"> 3</td>
+               <td valign="top" class="topBorderLight">3</td>
+               <td valign="top" class="topBorderLight"> 4</td>
+               <td valign="top" class="topBorderLight"><span class="redFonts">-</span></td>
+               <td nowrap="true" class="topBorderLight"><span class="redFonts"><i>-</i></span></td>
+              </tr>
+              <tr height="20" class="subHeaderBack">
+               <td colspan="3">Σύνολα περασμένων μαθημάτων εξαμήνου: <b>0</b></td>
+               <td colspan="10" nowrap="true" align="right" class="tablecell">ΜΟ:&nbsp; <span class="error">-</span> ΔΜ:&nbsp; <span class="error">0&nbsp;</span> Ώρες:&nbsp; <span class="error">0&nbsp;</span> ECTS:&nbsp; <span class="error">0&nbsp;</span></td>
+              </tr>
+              <tr>
+               <td colspan="10">
+                <hr size="1"></td>
+              </tr>
+              <tr height="20" class="subHeaderBack">
+               <td colspan="3"><b>ΓΕΝΙΚΑ ΣΥΝΟΛΑ ΠΕΡΑΣΜΕΝΩΝ ΜΑΘΗΜΑΤΩΝ <sup>(*)</sup>: 24</b></td>
+               <td colspan="10" nowrap="true" align="right" class="tablecell"><b> ΜΟ:&nbsp; <span class="error">7.50-</span> ΔΜ:&nbsp; <span class="error">72&nbsp;</span> Ώρες:&nbsp; <span class="error">74&nbsp;</span> ECTS:&nbsp; <span class="error">120&nbsp;</span></b></td>
+              </tr>
+              <tr>
+               <td colspan="10" class="italics"> * Σημείωση: Τα σύνολα αναφέρονται στον αριθμητικό μέσο όρο των περασμένων μαθημάτων και πιθανόν να διαφέρουν από τον τρόπο υπολογισμού του βαθμού πτυχίου. </td>
+              </tr>
+             </tbody>
+            </table></td>
+          </tr> 
+          <tr> 
+           <td colspan="2">&nbsp;</td> 
+          </tr> 
+         </tbody>
+        </table> 
+       </form> 
+      </div> <script>
+function showMe() 
+{			
+			var el ;
+			var elhideshow;
+			el =window.event.srcElement;
+			elhideshow = el.parentNode.parentNode.childNodes[4];
+			if (elhideshow.style.display=="")	
+			{			
+				el.style.color = "#000000"
+			//	el.style.backgroundColor="#EBEBEB";
+				elhideshow.style.display="none";
+				el.parentNode.childNodes[0].src="Images/plus.gif"
+			}
+			else
+			{
+			//	el.style.backgroundColor="#CDD2DC";
+				el.style.color = "#000066";
+				elhideshow.style.display="";
+				el.parentNode.childNodes[0].src="Images/minus.gif"
+		}
+} 
+		
+function window_onload() {
+	document.getElementById("subheader2").innerHTML=''
+	document.getElementById("header").innerHTML='Βαθμολογίες' +  ' - ' + document.getElementById("header").innerHTML
+	document.getElementById("pagedesc").innerHTML='Βαθμολογίες μαθημάτων. Η λίστα αναφέρεται στους βαθμούς της τελευταίας εξεταστικής περιόδου για κάθε μάθημα.'
+	
+	//document.body.style.backgroundColor="#F1F1F1"
+}
+ window_onload()
+</script> </td> 
+     <td width="50px" class="rightColumn">&nbsp;&nbsp;&nbsp;&nbsp;</td> 
+    </tr> 
+    <tr>
+     <td colspan="2" align="right"> 
+      <table id="footer" class="footer" align="right" border="0" cellpadding="0" cellspacing="0" style="width:100%;MARGIN-LEFT: 0px; MARGIN-TOP: 30px"> 
+       <tbody>
+        <tr> 
+         <td colspan="3">
+          <hr size="1" style="color:olive"></td> 
+        </tr> 
+        <tr>
+         <td width="50">&nbsp;</td>
+         <td>Σχεδιασμός και Ανάπτυξη: <a title="Cardisoft AE" target="_blank" class="footer" href="http://www.cardisoft.gr">Cardisoft ΑΕ</a></td> 
+        </tr> 
+        <tr>
+         <td height="30">&nbsp;</td>
+         <td>© 2003 Cardisoft ΑΕ. Με την επιφύλαξη κάθε νόμιμου δικαιώματος.</td> 
+        </tr> 
+       </tbody>
+      </table> </td> 
+     <td width="50px" class="rightColumn">&nbsp;&nbsp;&nbsp;&nbsp;</td> 
+    </tr> 
+   </tbody>
+  </table>   
+ </body>
+</html>

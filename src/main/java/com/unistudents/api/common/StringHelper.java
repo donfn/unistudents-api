@@ -1,6 +1,9 @@
 package com.unistudents.api.common;
 
 import javax.xml.bind.DatatypeConverter;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -36,6 +39,15 @@ public class StringHelper {
             return DatatypeConverter.printHexBinary(digest).toLowerCase();
         } catch (NoSuchAlgorithmException e) {
             return null;
+        }
+    }
+
+    public static void write(String fileName, String str) {
+        try (OutputStreamWriter writer =
+                     new OutputStreamWriter(new FileOutputStream(fileName), StandardCharsets.UTF_8)) {
+            writer.write(str);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

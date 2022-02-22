@@ -52,6 +52,8 @@ public class CardisoftParser extends Parser {
             student.setInfo(info);
             student.setProgress(progress);
 
+            // new ObjectMapper().writerWithDefaultPrettyPrinter()
+            //        .writeValue(new File("src/test/resources/cardisoft/student.json"), student);
             return student;
         } catch (Exception e) {
             logger.error("[" + PRE_LOG + "] Error: {}", e.getMessage(), e);
