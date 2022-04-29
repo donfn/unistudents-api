@@ -1,0 +1,74 @@
+name: Build and Deploy to GKE
+
+on:
+  push:
+    branches:
+      - migrate-to-k8s
+
+env:
+  PROJECT_ID: ${{ secrets.PROJECT_ID }}
+  GAR_LOCATION: europe
+  GKE_CLUSTER: unistudents-cluster
+  GKE_ZONE: ${{ secrets.REGION }}
+  DEPLOYMENT_NAME: api-legacy
+  REPOSITORY: api
+  IMAGE: api-legacy
+  GCP_PROJECT: ${{ secrets.PROJECT_ID }}
+
+jobs:
+  CI:
+    name: Build image using Maven and Deploy to GKE
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-java@v3
+      with:
+        distribution: 'adopt'
+        java-version: '8'
+    - run: mvn package
+    - id: 'auth'
+      uses: 'google-github-actions/auth@v0'
+      with:
+        credentials_json: '${{ secrets.GCLOUD_SERVICE_KEY }}'
+    - uses: google-github-actions/setup-gcloud@v0
+      with:
+        version: '290.0.1'
+        service_account_key: ${{ secrets.GCLOUD_SERVICE_KEY }}
+        project_id: ${{ env.PROJECT_ID }}
+
+    - name: Build
+      run: |-
+        docker build \
+          --tag "$GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE:$GITHUB_SHA" \
+          --build-arg GITHUB_SHA="$GITHUB_SHA" \
+          --build-arg GITHUB_REF="$GITHUB_REF" \
+          .
+
+    - run: |-
+        gcloud auth configure-docker --quiet
+        gcloud auth configure-docker europe-docker.pkg.dev --quiet
+    # Push the Docker image to Google Container Registry
+    - name: Publish
+      run: |-
+        docker push "$GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE:$GITHUB_SHA"
+
+    - name: Set up GKE credentials
+      uses: google-github-actions/get-gke-credentials@v0
+      with:
+        cluster_name: ${{ env.GKE_CLUSTER }}
+        location: ${{ env.GKE_ZONE }}
+        project_id: ${{ env.PROJECT_ID }}
+  # Set up kustomize
+    - name: Set up Kustomize
+      run: |-
+        curl -sfLo kustomize https://github.com/kubernetes-sigs/kustomize/releases/download/v3.1.0/kustomize_3.1.0_linux_amd64
+        chmod u+x ./kustomize
+    # Deploy the Docker image to the GKE cluster
+    - name: Deploy
+      run: |-
+        # replacing the image name in the k8s template
+        ./kustomize edit set image LOCATION-docker.pkg.dev/PROJECT_ID/REPOSITORY/IMAGE:TAG=$GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE:$GITHUB_SHA
+        ./kustomize build . | kubectl apply -f -
+        kubectl rollout status deployment/$DEPLOYMENT_NAME
+        kubectl get services -o wide

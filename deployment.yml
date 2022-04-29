@@ -1,0 +1,24 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-legacy
+spec:
+  replicas: 6
+  selector:
+    matchLabels:
+      app: api-legacy
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  minReadySeconds: 5
+  template:
+    metadata:
+      labels:
+        app: api-legacy
+    spec:
+      containers:
+      - name: api-legacy
+        image: LOCATION-docker.pkg.dev/PROJECT_ID/REPOSITORY/IMAGE:TAG
+        imagePullPolicy: Always
